@@ -11,8 +11,12 @@
     "lint": "tsc --noEmit && npx eslint '*/**/*.ts' --quiet",
     "start": "npx ts-node src"
   },
+  "dependencies": {
+    "winston": "^3.2.1"
+  },
   "devDependencies": {
     "@types/node": "^13.13.0",
+    "@types/winston": "^2.4.4",
     "@typescript-eslint/eslint-plugin": "^2.28.0",
     "@typescript-eslint/parser": "^2.28.0",
     "eslint": "^6.8.0",
