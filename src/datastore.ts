@@ -22,22 +22,22 @@ export default class DB implements DBInterface {
     this.datadir = absoluteDatadir;
 
     this.markets = new Datastore({
-      filename: path.join(absoluteDatadir, 'markets.db'),
+      filename: path.join(absoluteDatadir, 'db', 'markets.db'),
       autoload: true,
     });
 
     this.swaps = new Datastore({
-      filename: path.join(absoluteDatadir, 'swaps.db'),
+      filename: path.join(absoluteDatadir, 'db', 'swaps.db'),
       autoload: true,
     });
 
     this.unspents = new Datastore({
-      filename: path.join(absoluteDatadir, 'unspents.db'),
+      filename: path.join(absoluteDatadir, 'db', 'unspents.db'),
       autoload: true,
     });
 
     this.spendings = new Datastore({
-      filename: path.join(absoluteDatadir, 'spendings.db'),
+      filename: path.join(absoluteDatadir, 'db', 'spendings.db'),
       autoload: true,
     });
   }

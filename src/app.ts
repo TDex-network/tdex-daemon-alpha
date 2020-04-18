@@ -2,10 +2,12 @@ import createLogger from './logger';
 import winston from 'winston';
 import Config, { ConfigInterface } from './config';
 import DB from './datastore';
+import { initVault, VaultInterface } from './vault';
 
 class App {
   logger: winston.Logger;
   config: ConfigInterface;
+  vault?: VaultInterface;
   datastore: any;
 
   constructor() {
@@ -22,8 +24,14 @@ class App {
     });
   }
 
-  start() {
-    setInterval(() => this.logger.info('Im a daemon always runnning'), 250);
+  async start() {
+    try {
+      this.vault = await initVault(this.config.datadir);
+      const wallet = this.vault.derive(0, this.config.network);
+      this.logger.info(wallet.address);
+    } catch (e) {
+      this.logger.error(e.message);
+    }
   }
 
   shutdown() {

@@ -6,7 +6,7 @@ export interface ConfigInterface {
   datadir: string;
   network: string;
   grpcOperator: any;
-  grpTrader: any;
+  grpcTrader: any;
   market: any;
   tickers: any;
 }

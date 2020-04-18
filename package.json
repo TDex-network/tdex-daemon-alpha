@@ -12,7 +12,13 @@
     "start": "npx ts-node src"
   },
   "dependencies": {
+    "bip32": "^2.0.5",
+    "bip39": "^3.0.2",
+    "enquirer": "^2.3.5",
+    "liquidjs-lib": "vulpemventures/liquidjs-lib",
     "nedb": "^1.8.0",
+    "path": "^0.12.7",
+    "tdex-protobuf": "sevenlab/tdex-protobuf",
     "winston": "^3.2.1"
   },
   "devDependencies": {
