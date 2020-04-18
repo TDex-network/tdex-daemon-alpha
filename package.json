@@ -8,13 +8,15 @@
   "scripts": {
     "watch": "tsc --watch",
     "build": "tsc",
-    "lint": "tsc --noEmit && npx eslint '*/**/*.ts' --quiet",
+    "lint": "tsc --noEmit && npx eslint 'src/**/*.ts' --quiet",
     "start": "npx ts-node src"
   },
   "dependencies": {
+    "nedb": "^1.8.0",
     "winston": "^3.2.1"
   },
   "devDependencies": {
+    "@types/nedb": "^1.8.9",
     "@types/node": "^13.13.0",
     "@types/winston": "^2.4.4",
     "@typescript-eslint/eslint-plugin": "^2.28.0",

@@ -3,6 +3,7 @@ import * as os from 'os';
 import * as path from 'path';
 
 export interface ConfigInterface {
+  datadir: string;
   network: string;
   grpcOperator: any;
   grpTrader: any;
@@ -74,5 +75,9 @@ export default function Config(): ConfigInterface {
     throw 'Invalid config file at path ' + configPath;
   }
 
-  return configObject;
+  // Enrich config interface with current datadir
+  return {
+    datadir,
+    ...configObject,
+  };
 }
