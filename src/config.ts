@@ -15,11 +15,11 @@ function defaultConfig(): any {
   return {
     network: 'regtest',
     grpcOperator: {
-      host: 'localhost',
+      host: '0.0.0.0',
       port: '9000',
     },
     grpcTrader: {
-      host: 'localhost',
+      host: '0.0.0.0',
       port: '9945',
     },
     market: {

@@ -13,7 +13,12 @@ export interface VaultInterface {
   filepath: string;
   keystore: string;
   isEncrypted: boolean;
-  derive(index: number, network: string, isChange?: boolean): WalletInterface;
+  derive(
+    index: number,
+    network: string,
+    isFeeAccount?: boolean,
+    isChange?: boolean
+  ): WalletInterface;
 }
 
 export default class Vault implements VaultInterface {
@@ -32,12 +37,14 @@ export default class Vault implements VaultInterface {
 
   derive(
     index: number,
-    network = 'regtest',
+    network: string,
+    isFeeAccount = false,
     isChange = false
   ): WalletInterface {
     const coinType = network === 'liquid' ? 0 : 1;
     const change = !isChange ? 0 : 1;
-    const derivationPath = `m/84'/${coinType}'/0'/${change}/${index}`;
+    const account = !isFeeAccount ? 0 : 1;
+    const derivationPath = `m/84'/${coinType}'/${account}'/${change}/${index}`;
 
     let mnemonic;
     if (this.isEncrypted) {
@@ -90,46 +97,48 @@ async function generateSeedAndSave(filepath: string): Promise<void> {
     value = mnemonic;
   }
 
-  const vaultObject = {
-    keystore: {
-      isEncrypted,
-      value,
-    },
-  };
+  fs.writeFileSync(
+    filepath,
+    JSON.stringify(
+      {
+        keystore: {
+          isEncrypted,
+          value,
+        },
+      },
+      undefined,
+      2
+    ),
+    { encoding: 'utf8', flag: 'w' }
+  );
 
-  const serialized = JSON.stringify(vaultObject, undefined, 2);
-  fs.writeFileSync(filepath, serialized, { encoding: 'utf8', flag: 'w' });
-}
-
-export async function initVault(datadir: string): Promise<VaultInterface> {
-  let isEncrypted = false;
-  let keystoreValue;
-  const vaultPath = path.join(datadir, 'vault.json');
-  if (!fs.existsSync(vaultPath)) {
-    await generateSeedAndSave(vaultPath);
-    //Here we exit because we need to restart for fetching the password from env variable
+  if (isEncrypted) {
     console.log(
       'Wallet created! Restart the daemon exporting the env variable TDEX_PASSWORD'
     );
     console.log('Shutting down...');
     process.exit(0);
-  } else {
-    const read = fs.readFileSync(vaultPath, 'utf8');
-    let deserialized: any;
-    try {
-      deserialized = JSON.parse(read);
-    } catch (e) {
-      throw new Error('Error deserializing Vault storage file');
-    }
+  }
+}
 
-    isEncrypted = deserialized.keystore.isEncrypted;
-    if (isEncrypted && !process.env.TDEX_PASSWORD)
-      throw new Error(
-        `Missing TDEX_PASSWORD env variable\nThe keystore at ${vaultPath} is encrypted\n`
-      );
+export async function initVault(datadir: string): Promise<VaultInterface> {
+  const vaultPath = path.join(datadir, 'vault.json');
+  if (!fs.existsSync(vaultPath)) await generateSeedAndSave(vaultPath);
 
-    keystoreValue = deserialized.keystore.value;
+  const read = fs.readFileSync(vaultPath, 'utf8');
+  let deserialized: any;
+  try {
+    deserialized = JSON.parse(read);
+  } catch (e) {
+    throw new Error('Error deserializing Vault storage file');
   }
 
+  const isEncrypted = deserialized.keystore.isEncrypted;
+  if (isEncrypted && !process.env.TDEX_PASSWORD)
+    throw new Error(
+      `Missing TDEX_PASSWORD env variable\nThe keystore at ${vaultPath} is encrypted\n`
+    );
+
+  const keystoreValue = deserialized.keystore.value;
   return new Vault(vaultPath, keystoreValue, isEncrypted);
 }
