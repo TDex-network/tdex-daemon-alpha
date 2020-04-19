@@ -109,7 +109,7 @@ class Trade {
   ): Promise<void> {
     const marketModel = new Markets(this.datastore.markets);
     const swapModel = new Swaps(this.datastore.swaps);
-    let quoteAsset;
+    let quoteAsset = undefined;
     try {
       const market = call.request.getMarket();
       const swapRequestMessage = call.request.getSwapRequest();

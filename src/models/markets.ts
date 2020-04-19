@@ -40,14 +40,15 @@ export default class Markets {
   }
 
   getLastMarket(): Promise<MarketSchema> {
-    return new Promise<MarketSchema>((resolve, reject) => {
+    return new Promise<MarketSchema | any>((resolve, reject) => {
       this.storage
         .find({})
         .sort({ derivationIndex: -1 })
         .limit(1)
         .exec((err: any, docs: any[]) => {
-          if (err || docs.length !== 1) reject(err || new Error('Read error'));
-          else resolve(docs[0]);
+          if (err || docs.length > 1) reject(err || new Error('Read error'));
+          if (docs.length === 0) resolve({ derivationIndex: Number(-1)});
+          resolve(docs[0]);
         });
     });
   }
