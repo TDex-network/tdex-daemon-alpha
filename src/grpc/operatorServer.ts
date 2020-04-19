@@ -1,23 +1,30 @@
 import { Server, ServerCredentials } from 'grpc';
 import { Logger } from 'winston';
 
-import { TradeService, Trade } from '../services/tradeService';
-import { DBInterface } from '../db/datastore';
+import { Operator, OperatorService } from '../services/operatorService';
 import { VaultInterface } from '../components/vault';
+import { DBInterface } from '../db/datastore';
 
-export default class TradeServer {
+export default class OperatorServer {
   server: Server;
 
   constructor(
     private datastore: DBInterface,
     private vault: VaultInterface,
+    private crawler: any,
     private network: string,
+    private defaultMarket: any,
     private logger: Logger
   ) {
     this.server = new Server();
-
-    const service = new Trade(this.datastore, this.vault, this.network);
-    this.server.addService(TradeService, service as any);
+    const serviceImplementation = new Operator(
+      this.datastore,
+      this.vault,
+      this.crawler,
+      this.network,
+      this.defaultMarket
+    );
+    this.server.addService(OperatorService, serviceImplementation as any);
   }
 
   listen(host: string, port: number): void {
@@ -29,13 +36,13 @@ export default class TradeServer {
     if (bindCode === 0) throw new Error(`gRPC could not bind on port: ${port}`);
 
     this.server.start();
-    this.logger.info(`Trader gRPC server listening on ${host}:${port}`);
+    this.logger.info(`Operator gRPC server listening on ${host}:${port}`);
   }
 
   close(): Promise<void> {
     return new Promise((resolve) =>
       this.server.tryShutdown(() => {
-        this.logger.info('Trader gRPC server completed shutdown');
+        this.logger.info('Operator gRPC server completed shutdown');
         resolve();
       })
     );

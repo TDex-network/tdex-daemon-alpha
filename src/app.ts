@@ -3,16 +3,16 @@ import winston from 'winston';
 import DB from './db/datastore';
 import createLogger from './logger';
 import TradeServer from './grpc/tradeServer';
-//import Markets from './models/markets';
+import OperatorServer from './grpc/operatorServer';
 import Config, { ConfigInterface } from './config';
 import { initVault, VaultInterface } from './components/vault';
-import Markets from './models/markets';
 
 class App {
   logger: winston.Logger;
   config: ConfigInterface;
   vault!: VaultInterface;
   tradeGrpc!: TradeServer;
+  operatorGrpc!: OperatorServer;
   datastore: any;
 
   constructor() {
@@ -39,26 +39,23 @@ class App {
       this.logger.info('Deposit address ' + wallet.address);
       this.logger.info('Fee service address ' + feeWallet.address);
 
-      const model = new Markets(this.datastore.markets);
-      /* 
-            await model.addMarket({ 
-              walletAddress: wallet.address,
-              derivationIndex: 0,
-              baseAsset: this.config.market.baseAsset[this.config.network],
-              quoteAsset: 'a48e1d34c085f798bc5a7743eb881bbf089108ae74765bd411935c59f6ecded2',
-              fee: this.config.market.fee,
-              tradable: true 
-            }); */
-      console.log(await model.getMarkets());
-
-      const { host, port } = this.config.grpcTrader;
+      this.operatorGrpc = new OperatorServer(
+        this.datastore,
+        this.vault,
+        {},
+        this.config.network,
+        this.config.market,
+        this.logger
+      );
       this.tradeGrpc = new TradeServer(
         this.datastore,
         this.vault,
         this.config.network,
         this.logger
       );
-      this.tradeGrpc.listen(host, port);
+      const { grpcTrader, grpcOperator } = this.config;
+      this.tradeGrpc.listen(grpcTrader.host, grpcTrader.port);
+      this.operatorGrpc.listen(grpcOperator.host, grpcOperator.port);
     } catch (e) {
       console.error(e);
       this.logger.error(e.message);
@@ -70,6 +67,7 @@ class App {
     this.datastore.close();
 
     await this.tradeGrpc.close();
+    await this.operatorGrpc.close();
 
     process.exit(0);
   }

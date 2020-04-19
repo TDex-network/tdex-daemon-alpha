@@ -7,6 +7,7 @@ export type MarketSchema = {
   quoteAsset: string; // the non-base asset hash is used as the market id
   walletAddress: string;
   derivationIndex: number;
+  fundingTx?: string;
 };
 
 export default class Markets {
@@ -35,6 +36,19 @@ export default class Markets {
         if (err) reject(err);
         resolve(doc);
       });
+    });
+  }
+
+  getLastMarket(): Promise<MarketSchema> {
+    return new Promise<MarketSchema>((resolve, reject) => {
+      this.storage
+        .find({})
+        .sort({ derivationIndex: -1 })
+        .limit(1)
+        .exec((err: any, docs: any[]) => {
+          if (err || docs.length !== 1) reject(err || new Error('Read error'));
+          else resolve(docs[0]);
+        });
     });
   }
 
