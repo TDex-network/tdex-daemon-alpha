@@ -33,12 +33,6 @@ class App {
     try {
       this.vault = await initVault(this.config.datadir);
 
-      const wallet = this.vault.derive(0, this.config.network);
-      const feeWallet = this.vault.derive(0, this.config.network, true);
-
-      this.logger.info('Deposit address ' + wallet.address);
-      this.logger.info('Fee service address ' + feeWallet.address);
-
       this.operatorGrpc = new OperatorServer(
         this.datastore,
         this.vault,
