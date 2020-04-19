@@ -3,9 +3,10 @@ import * as os from 'os';
 import * as path from 'path';
 
 export interface ConfigInterface {
+  datadir: string;
   network: string;
   grpcOperator: any;
-  grpTrader: any;
+  grpcTrader: any;
   market: any;
   tickers: any;
 }
@@ -14,11 +15,11 @@ function defaultConfig(): any {
   return {
     network: 'regtest',
     grpcOperator: {
-      host: 'localhost',
+      host: '0.0.0.0',
       port: '9000',
     },
     grpcTrader: {
-      host: 'localhost',
+      host: '0.0.0.0',
       port: '9945',
     },
     market: {
@@ -74,5 +75,9 @@ export default function Config(): ConfigInterface {
     throw 'Invalid config file at path ' + configPath;
   }
 
-  return configObject;
+  // Enrich config interface with current datadir
+  return {
+    datadir,
+    ...configObject,
+  };
 }
