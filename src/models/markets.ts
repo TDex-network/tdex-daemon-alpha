@@ -49,10 +49,16 @@ export default class Markets {
 
   updateMarket(query: { quoteAsset: string }, updateQuery: any): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-      this.storage.update(query, { $set: updateQuery }, {}, (err: any) => {
-        if (err) reject(err);
-        else resolve();
-      });
+      this.storage.update(
+        query,
+        { $set: updateQuery },
+        { multi: false },
+        (err: any, numReplaced: any) => {
+          if (err || Number(numReplaced) !== 1)
+            reject(err || new Error('Update error'));
+          else resolve();
+        }
+      );
     });
   }
 }
