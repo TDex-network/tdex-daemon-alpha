@@ -3,7 +3,7 @@ import { Logger } from 'winston';
 
 import { TradeService, Trade } from './services/tradeService';
 import { DBInterface } from '../db/datastore';
-import { VaultInterface } from '../core/vault';
+import { VaultInterface } from '../components/vault';
 
 export default class TradeServer {
   server: Server;

@@ -13,18 +13,33 @@ interface UtxoInterface {
   script?: string;
 }
 
+function urlFromNetwork(n: string): string {
+  const availableNetworks = Object.keys(EXPLORER_URL);
+  if (!availableNetworks.includes(n))
+    throw new Error('Network not support by the explorer');
+
+  return (EXPLORER_URL as any)[n];
+}
+
 export async function fetchUtxos(
   address: string,
-  url: string
+  network: string,
+  asset?: string
 ): Promise<Array<UtxoInterface>> {
-  return (await axios.get(`${url}/address/${address}/utxo`)).data;
+  const url = urlFromNetwork(network);
+  const allUtxos = (await axios.get(`${url}/address/${address}/utxo`)).data;
+  if (!asset) return allUtxos;
+
+  return allUtxos.filter(function (utxo: { asset: any }) {
+    return utxo.asset === asset;
+  });
 }
 
 export async function fetchBalances(
   address: string,
-  url: string = EXPLORER_URL.regtest
+  network: string
 ): Promise<any> {
-  const fetchedData = await fetchUtxos(address, url);
+  const fetchedData = await fetchUtxos(address, network);
   const balances = fetchedData.reduce(
     (storage: { [x: string]: any }, item: { [x: string]: any; value: any }) => {
       // get the first instance of the key by which we're grouping
@@ -63,4 +78,35 @@ export async function fetchBalances(
     balances,
     utxos,
   };
+}
+
+export async function pushTx(hex: string, network: string): Promise<any> {
+  const url = urlFromNetwork(network);
+  let result;
+  try {
+    result = await axios.post(`${url}/tx`, hex, {
+      headers: { 'Content-Type': 'text/plain' },
+    });
+
+    return result.data;
+  } catch (error) {
+    // Error 😨
+    if (error.response) {
+      /*
+       * The request was made and the server responded with a
+       * status code that falls out of the range of 2xx
+       */
+      throw new Error(error.response.data);
+    } else if (error.request) {
+      /*
+       * The request was made but no response was received, `error.request`
+       * is an instance of XMLHttpRequest in the browser and an instance
+       * of http.ClientRequest in Node.js
+       */
+      throw new Error(error.request);
+    } else {
+      // Something happened in setting up the request and triggered an Error
+      throw new Error(error.message);
+    }
+  }
 }

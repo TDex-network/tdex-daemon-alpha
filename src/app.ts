@@ -5,7 +5,7 @@ import createLogger from './logger';
 import TradeServer from './grpc/tradeServer';
 //import Markets from './models/markets';
 import Config, { ConfigInterface } from './config';
-import { initVault, VaultInterface } from './core/vault';
+import { initVault, VaultInterface } from './components/vault';
 import Markets from './models/markets';
 
 class App {
@@ -33,21 +33,22 @@ class App {
     try {
       this.vault = await initVault(this.config.datadir);
 
-      //const wallet = this.vault.derive(0, this.config.network);
+      const wallet = this.vault.derive(0, this.config.network);
       const feeWallet = this.vault.derive(0, this.config.network, true);
 
-      this.logger.info('Deposit address for fee service ' + feeWallet.address);
+      this.logger.info('Deposit address ' + wallet.address);
+      this.logger.info('Fee service address ' + feeWallet.address);
 
       const model = new Markets(this.datastore.markets);
-
-      /* await model.addMarket({ 
-        walletAddress: wallet.address,
-        derivationIndex: 1,
-        baseAsset: this.config.market.baseAsset[this.config.network],
-        quoteAsset: '8b29b105ee36ef568cbc271c0b9636c3af68aad759ad5113917861ae66602052',
-        fee: this.config.market.fee,
-        tradable: true 
-      }); */
+      /* 
+            await model.addMarket({ 
+              walletAddress: wallet.address,
+              derivationIndex: 0,
+              baseAsset: this.config.market.baseAsset[this.config.network],
+              quoteAsset: 'a48e1d34c085f798bc5a7743eb881bbf089108ae74765bd411935c59f6ecded2',
+              fee: this.config.market.fee,
+              tradable: true 
+            }); */
       console.log(await model.getMarkets());
 
       const { host, port } = this.config.grpcTrader;

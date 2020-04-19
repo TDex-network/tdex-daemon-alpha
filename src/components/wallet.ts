@@ -1,6 +1,12 @@
-import { ECPair, payments, Psbt, confidential } from 'liquidjs-lib';
+import {
+  ECPair,
+  payments,
+  Psbt,
+  confidential,
+  Transaction,
+} from 'liquidjs-lib';
 //Libs
-import { coinselect } from '../utils';
+import { coinselect, calculateFees } from '../utils';
 //Types
 import { ECPairInterface } from 'liquidjs-lib/types/ecpair';
 import { Network } from 'liquidjs-lib/types/networks';
@@ -20,8 +26,8 @@ export interface WalletInterface {
     inputAsset: string,
     outputAsset: string
   ): string;
+  payFees(psbtBase64: string, utxos: Array<any>): string;
   sign(psbtBase64: string): string;
-  toHex(psbtBase64: string): string;
 }
 
 export default class Wallet implements WalletInterface {
@@ -106,8 +112,49 @@ export default class Wallet implements WalletInterface {
       });
     }
 
-    const base64 = psbt.toBase64();
-    return base64;
+    return psbt.toBase64();
+  }
+
+  payFees(psbtBase64: string, utxos: any[]): string {
+    const psbt = Psbt.fromBase64(psbtBase64);
+    const tx = Transaction.fromBuffer(psbt.data.getTransaction());
+    const { fees } = calculateFees(tx.ins.length + 1, tx.outs.length + 2);
+    const encodedAsset = Buffer.concat([
+      Buffer.alloc(1, 1),
+      Buffer.from(this.network.assetHash, 'hex').reverse(),
+    ]);
+
+    const { unspents, change } = coinselect(utxos, fees);
+    unspents.forEach((input) =>
+      psbt.addInput({
+        hash: input.txid,
+        index: input.vout,
+        witnessUtxo: {
+          nonce: Buffer.from('00', 'hex'),
+          value: confidential.satoshiToConfidentialValue(input.value),
+          script: Buffer.from(this.script, 'hex'),
+          asset: encodedAsset,
+        },
+      } as any)
+    );
+
+    psbt.addOutput({
+      asset: encodedAsset,
+      script: Buffer.alloc(0),
+      value: confidential.satoshiToConfidentialValue(fees),
+      nonce: Buffer.alloc(1, 0),
+    });
+
+    if (change > 0) {
+      psbt.addOutput({
+        asset: encodedAsset,
+        script: Buffer.from(this.script, 'hex'),
+        value: confidential.satoshiToConfidentialValue(change),
+        nonce: Buffer.alloc(1, 0),
+      });
+    }
+
+    return psbt.toBase64();
   }
 
   sign(psbtBase64: string): string {
@@ -127,18 +174,20 @@ export default class Wallet implements WalletInterface {
     if (!psbt.validateSignaturesOfInput(index))
       throw new Error('Invalid signature');
 
-    psbt.finalizeInput(index);
-
     return psbt.toBase64();
   }
 
-  toHex(psbtBase64: string): string {
+  static toHex(psbtBase64: string): string {
     let psbt: Psbt;
     try {
       psbt = Psbt.fromBase64(psbtBase64);
     } catch (ignore) {
       throw new Error('Invalid psbt');
     }
+
+    //Let's finalize all inputs
+    psbt.validateSignaturesOfAllInputs();
+    psbt.finalizeAllInputs();
 
     return psbt.extractTransaction().toHex();
   }

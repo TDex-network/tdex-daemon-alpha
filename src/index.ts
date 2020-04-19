@@ -9,11 +9,15 @@ Liquidity providers can spin up the alpha-daemon with custom configuration file,
  */
 import App from './app';
 
-if (!module.parent) {
+async function main() {
   const app = new App();
   try {
-    void app.start();
+    await app.start();
   } catch (err) {
     app.logger.error(err.message);
   }
+}
+
+if (!module.parent) {
+  main();
 }
