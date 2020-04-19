@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as bip39 from 'bip39';
 import * as bip32 from 'bip32';
-import { encrypt, decrypt } from './utils';
+import { encrypt, decrypt } from '../utils';
 import { networks } from 'liquidjs-lib';
 import { fromWIF, WalletInterface } from './wallet';
 

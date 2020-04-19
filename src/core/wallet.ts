@@ -1,6 +1,6 @@
 import { ECPair, payments, Psbt, confidential } from 'liquidjs-lib';
 //Libs
-import { coinselect } from './utils';
+import { coinselect } from '../utils';
 //Types
 import { ECPairInterface } from 'liquidjs-lib/types/ecpair';
 import { Network } from 'liquidjs-lib/types/networks';

@@ -12,6 +12,7 @@
     "start": "npx ts-node src"
   },
   "dependencies": {
+    "axios": "^0.19.2",
     "bip32": "^2.0.5",
     "bip39": "^3.0.2",
     "enquirer": "^2.3.5",
