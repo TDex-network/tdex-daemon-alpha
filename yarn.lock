@@ -2102,7 +2102,7 @@ globals@^12.1.0:
   dependencies:
     type-fest "^0.8.1"
 
-google-protobuf@^3.11.4:
+google-protobuf@^3.11.4, google-protobuf@^3.6.1:
   version "3.11.4"
   resolved "https://registry.yarnpkg.com/google-protobuf/-/google-protobuf-3.11.4.tgz#598ca405a3cfa917a2132994d008b5932ef42014"
   integrity sha512-lL6b04rDirurUBOgsY2+LalI6Evq8eH5TcNzi7TYQ3BsIWelT0KSOQSBsXuavEkNf+odQU6c0lgz3UsZXeNX9Q==
@@ -2116,6 +2116,13 @@ growly@^1.3.0:
   version "1.3.0"
   resolved "https://registry.yarnpkg.com/growly/-/growly-1.3.0.tgz#f10748cbe76af964b7c96c93c6bcc28af120c081"
   integrity sha1-8QdIy+dq+WS3yWyTxrzCivEgwIE=
+
+grpc-tools@^1.8.1:
+  version "1.8.1"
+  resolved "https://registry.yarnpkg.com/grpc-tools/-/grpc-tools-1.8.1.tgz#8b2e8bf42028d94c85817d954685c46a7bfbc31a"
+  integrity sha512-CvZLshEDbum8ZtB8r3bn6JsrHs3L7S1jf7PTa02nZSLmcLTKbiXH5UYrte06Kh7SdzFmkxPMaOsys2rCs+HRjA==
+  dependencies:
+    node-pre-gyp "^0.12.0"
 
 grpc@^1.24.2:
   version "1.24.2"
@@ -3401,6 +3408,22 @@ node-notifier@^6.0.0:
     shellwords "^0.1.1"
     which "^1.3.1"
 
+node-pre-gyp@^0.12.0:
+  version "0.12.0"
+  resolved "https://registry.yarnpkg.com/node-pre-gyp/-/node-pre-gyp-0.12.0.tgz#39ba4bb1439da030295f899e3b520b7785766149"
+  integrity sha512-4KghwV8vH5k+g2ylT+sLTjy5wmUOb9vPhnM8NHvRf9dHmnW/CndrFXy2aRPaPST6dugXSdHXfeaHQm77PIz/1A==
+  dependencies:
+    detect-libc "^1.0.2"
+    mkdirp "^0.5.1"
+    needle "^2.2.1"
+    nopt "^4.0.1"
+    npm-packlist "^1.1.6"
+    npmlog "^4.0.2"
+    rc "^1.2.7"
+    rimraf "^2.6.1"
+    semver "^5.3.0"
+    tar "^4"
+
 node-pre-gyp@^0.14.0:
   version "0.14.0"
   resolved "https://registry.yarnpkg.com/node-pre-gyp/-/node-pre-gyp-0.14.0.tgz#9a0596533b877289bcad4e143982ca3d904ddc83"
@@ -4449,7 +4472,7 @@ table@^5.2.3:
     slice-ansi "^2.1.0"
     string-width "^3.0.0"
 
-tar@^4.4.2:
+tar@^4, tar@^4.4.2:
   version "4.4.13"
   resolved "https://registry.yarnpkg.com/tar/-/tar-4.4.13.tgz#43b364bc52888d555298637b10d60790254ab525"
   integrity sha512-w2VwSrBoHa5BsSyH+KxEqeQBAllHhccyMFVHtGtdMpF4W7IRWfZjFiQceJPChOeTsSDVUpER2T8FA93pr0L+QA==
@@ -4627,6 +4650,13 @@ ts-node@^8.8.2:
     make-error "^1.1.1"
     source-map-support "^0.5.6"
     yn "3.1.1"
+
+ts-protoc-gen@^0.12.0:
+  version "0.12.0"
+  resolved "https://registry.yarnpkg.com/ts-protoc-gen/-/ts-protoc-gen-0.12.0.tgz#932e5738f14b67e7202825b06f8c548cb7d8ef34"
+  integrity sha512-V7jnICJxKqalBrnJSMTW5tB9sGi48gOC325bfcM7TDNUItVOlaMM//rQmuo49ybipk/SyJTnWXgtJnhHCevNJw==
+  dependencies:
+    google-protobuf "^3.6.1"
 
 tslib@^1.8.1, tslib@^1.9.0:
   version "1.11.1"

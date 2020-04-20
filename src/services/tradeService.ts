@@ -16,14 +16,14 @@ import {
 import { SwapAccept } from 'tdex-protobuf/js/swap_pb';
 import { TradeService } from 'tdex-protobuf/js/trade_grpc_pb';
 
-import Markets from '../../models/markets';
-import { DBInterface } from '../../db/datastore';
-import { fetchBalances, fetchUtxos, pushTx } from '../../utils';
-import { VaultInterface } from '../../components/vault';
-import { calculateExpectedAmount } from '../../components/trade';
+import Markets from '../models/markets';
+import { DBInterface } from '../db/datastore';
+import { fetchBalances, fetchUtxos, pushTx } from '../utils';
+import { VaultInterface } from '../components/vault';
+import { calculateExpectedAmount } from '../components/trade';
 import { networks } from 'liquidjs-lib';
-import Swaps from '../../models/swaps';
-import Wallet from '../../components/wallet';
+import Swaps from '../models/swaps';
+import Wallet from '../components/wallet';
 
 class Trade {
   constructor(
@@ -109,7 +109,7 @@ class Trade {
   ): Promise<void> {
     const marketModel = new Markets(this.datastore.markets);
     const swapModel = new Swaps(this.datastore.swaps);
-    let quoteAsset;
+    let quoteAsset = undefined;
     try {
       const market = call.request.getMarket();
       const swapRequestMessage = call.request.getSwapRequest();
@@ -213,10 +213,11 @@ class Trade {
       call.write(reply);
       call.end();
     } catch (e) {
+      console.error(e);
+
       if (quoteAsset)
         await marketModel.updateMarket({ quoteAsset }, { tradable: true });
 
-      console.error(e);
       call.emit('error', e);
       call.write(e);
       call.end();

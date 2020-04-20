@@ -3,22 +3,27 @@ import winston from 'winston';
 import DB from './db/datastore';
 import createLogger from './logger';
 import TradeServer from './grpc/tradeServer';
-//import Markets from './models/markets';
+import OperatorServer from './grpc/operatorServer';
 import Config, { ConfigInterface } from './config';
 import { initVault, VaultInterface } from './components/vault';
-import Markets from './models/markets';
+import Crawler, { CrawlerInterface } from './components/crawler';
+import Markets, { schemaFromPair } from './models/markets';
+import { UtxoInterface } from './utils';
 
 class App {
   logger: winston.Logger;
   config: ConfigInterface;
   vault!: VaultInterface;
   tradeGrpc!: TradeServer;
-  datastore: any;
+  operatorGrpc!: OperatorServer;
+  datastore: DB;
+  crawler: CrawlerInterface;
 
   constructor() {
     this.logger = createLogger();
     this.config = Config();
     this.datastore = new DB(this.config.datadir);
+    this.crawler = new Crawler(this.config.network);
 
     process.on('SIGINT', async () => {
       await this.shutdown();
@@ -33,32 +38,52 @@ class App {
     try {
       this.vault = await initVault(this.config.datadir);
 
-      const wallet = this.vault.derive(0, this.config.network);
-      const feeWallet = this.vault.derive(0, this.config.network, true);
+      this.crawler.on(
+        'crawler.deposit',
+        async (walletAddress: string, pair: Array<UtxoInterface>) => {
+          const { market, network } = this.config;
+          const model = new Markets(this.datastore.markets);
 
-      this.logger.info('Deposit address ' + wallet.address);
-      this.logger.info('Fee service address ' + feeWallet.address);
+          const baseAsset = market.baseAsset[network];
+          const { baseFundingTx, quoteFundingTx, quoteAsset } = schemaFromPair(
+            baseAsset,
+            pair
+          );
 
-      const model = new Markets(this.datastore.markets);
-      /* 
-            await model.addMarket({ 
-              walletAddress: wallet.address,
-              derivationIndex: 0,
-              baseAsset: this.config.market.baseAsset[this.config.network],
-              quoteAsset: 'a48e1d34c085f798bc5a7743eb881bbf089108ae74765bd411935c59f6ecded2',
-              fee: this.config.market.fee,
-              tradable: true 
-            }); */
-      console.log(await model.getMarkets());
+          this.logger.info(
+            `New deposit for market ${quoteAsset} on address ${walletAddress}`
+          );
 
-      const { host, port } = this.config.grpcTrader;
+          await model.updateMarketByWallet(
+            { walletAddress },
+            {
+              baseAsset,
+              quoteAsset,
+              baseFundingTx,
+              quoteFundingTx,
+              fee: market.fee,
+              tradable: true,
+            }
+          );
+        }
+      );
+
+      this.operatorGrpc = new OperatorServer(
+        this.datastore,
+        this.vault,
+        this.crawler,
+        this.config.network,
+        this.logger
+      );
       this.tradeGrpc = new TradeServer(
         this.datastore,
         this.vault,
         this.config.network,
         this.logger
       );
-      this.tradeGrpc.listen(host, port);
+      const { grpcTrader, grpcOperator } = this.config;
+      this.tradeGrpc.listen(grpcTrader.host, grpcTrader.port);
+      this.operatorGrpc.listen(grpcOperator.host, grpcOperator.port);
     } catch (e) {
       console.error(e);
       this.logger.error(e.message);
@@ -70,6 +95,7 @@ class App {
     this.datastore.close();
 
     await this.tradeGrpc.close();
+    await this.operatorGrpc.close();
 
     process.exit(0);
   }

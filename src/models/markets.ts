@@ -1,13 +1,33 @@
 import Datastore from 'nedb';
+import { UtxoInterface } from '../utils';
 
 export type MarketSchema = {
   fee: number;
   tradable: boolean;
   baseAsset: string;
   quoteAsset: string; // the non-base asset hash is used as the market id
+  baseFundingTx?: string;
+  quoteFundingTX?: string;
   walletAddress: string;
   derivationIndex: number;
 };
+
+export function schemaFromPair(
+  baseAsset: string,
+  pair: Array<UtxoInterface>
+): any {
+  const [first, second] = pair;
+  const quoteAsset = first.asset !== baseAsset ? first.asset : second.asset;
+  const baseFundingTx = first.asset === baseAsset ? first.txid : second.txid;
+  const quoteFundingTx = first.asset !== baseAsset ? first.txid : second.txid;
+
+  return {
+    baseFundingTx,
+    quoteFundingTx,
+    baseAsset,
+    quoteAsset,
+  };
+}
 
 export default class Markets {
   storage: Datastore<any>;
@@ -38,12 +58,44 @@ export default class Markets {
     });
   }
 
+  getLastMarket(): Promise<MarketSchema> {
+    return new Promise<MarketSchema | any>((resolve, reject) => {
+      this.storage
+        .find({})
+        .sort({ derivationIndex: -1 })
+        .limit(1)
+        .exec((err: any, docs: any[]) => {
+          if (err || docs.length > 1) reject(err || new Error('Read error'));
+          if (docs.length === 0) resolve({ derivationIndex: Number(-1) });
+          resolve(docs[0]);
+        });
+    });
+  }
+
   addMarket(arg: MarketSchema): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       this.storage.insert(arg, (err: any) => {
         if (err) reject(err);
         else resolve();
       });
+    });
+  }
+
+  updateMarketByWallet(
+    query: { walletAddress: string },
+    updateQuery: any
+  ): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      this.storage.update(
+        query,
+        { $set: updateQuery },
+        { multi: false },
+        (err: any, numReplaced: any) => {
+          if (err || Number(numReplaced) !== 1)
+            reject(err || new Error('Update error'));
+          else resolve();
+        }
+      );
     });
   }
 
