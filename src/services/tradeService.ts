@@ -213,10 +213,11 @@ class Trade {
       call.write(reply);
       call.end();
     } catch (e) {
+      console.error(e);
+
       if (quoteAsset)
         await marketModel.updateMarket({ quoteAsset }, { tradable: true });
 
-      console.error(e);
       call.emit('error', e);
       call.write(e);
       call.end();

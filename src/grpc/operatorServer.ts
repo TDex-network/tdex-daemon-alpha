@@ -4,6 +4,7 @@ import { Logger } from 'winston';
 import { Operator, OperatorService } from '../services/operatorService';
 import { VaultInterface } from '../components/vault';
 import { DBInterface } from '../db/datastore';
+import { CrawlerInterface } from '../components/crawler';
 
 export default class OperatorServer {
   server: Server;
@@ -11,9 +12,8 @@ export default class OperatorServer {
   constructor(
     private datastore: DBInterface,
     private vault: VaultInterface,
-    private crawler: any,
+    private crawler: CrawlerInterface,
     private network: string,
-    private defaultMarket: any,
     private logger: Logger
   ) {
     this.server = new Server();
@@ -21,8 +21,7 @@ export default class OperatorServer {
       this.datastore,
       this.vault,
       this.crawler,
-      this.network,
-      this.defaultMarket
+      this.network
     );
     this.server.addService(OperatorService, serviceImplementation as any);
   }

@@ -5,7 +5,7 @@ export const EXPLORER_URL = {
   regtest: 'https://nigiri.network/liquid/api',
 };
 
-interface UtxoInterface {
+export interface UtxoInterface {
   txid: string;
   vout: number;
   asset: string;
@@ -13,9 +13,13 @@ interface UtxoInterface {
   script?: string;
 }
 
-function urlFromNetwork(n: string): string {
+export function isValidNetwork(n: string) {
   const availableNetworks = Object.keys(EXPLORER_URL);
-  if (!availableNetworks.includes(n))
+  return availableNetworks.includes(n);
+}
+
+function urlFromNetwork(n: string): string {
+  if (!isValidNetwork(n))
     throw new Error('Network not support by the explorer');
 
   return (EXPLORER_URL as any)[n];

@@ -5,14 +5,14 @@ import { DepositAddressReply } from '../proto/operator_pb';
 import Markets from '../models/markets';
 import { DBInterface } from '../db/datastore';
 import { VaultInterface } from '../components/vault';
+import { CrawlerInterface } from '../components/crawler';
 
 class Operator {
   constructor(
     private datastore: DBInterface,
     private vault: VaultInterface,
-    private crawler: any,
-    private network: string,
-    private defaultMarket: any
+    private crawler: CrawlerInterface,
+    private network: string
   ) {}
 
   async depositAddress(
@@ -29,13 +29,13 @@ class Operator {
       await model.addMarket({
         walletAddress: nextWallet.address,
         derivationIndex: nextDerivationIndex,
-        baseAsset: this.defaultMarket.baseAsset[this.network],
+        baseAsset: '',
         quoteAsset: '',
-        fee: this.defaultMarket.fee,
+        fee: 0,
         tradable: false,
       });
 
-      console.log(this.crawler);
+      this.crawler.start(nextWallet.address);
 
       const reply = new DepositAddressReply();
       reply.setAddress(nextWallet.address);

@@ -6,6 +6,9 @@ import TradeServer from './grpc/tradeServer';
 import OperatorServer from './grpc/operatorServer';
 import Config, { ConfigInterface } from './config';
 import { initVault, VaultInterface } from './components/vault';
+import Crawler, { CrawlerInterface } from './components/crawler';
+import Markets, { schemaFromPair } from './models/markets';
+import { UtxoInterface } from './utils';
 
 class App {
   logger: winston.Logger;
@@ -13,12 +16,14 @@ class App {
   vault!: VaultInterface;
   tradeGrpc!: TradeServer;
   operatorGrpc!: OperatorServer;
-  datastore: any;
+  datastore: DB;
+  crawler: CrawlerInterface;
 
   constructor() {
     this.logger = createLogger();
     this.config = Config();
     this.datastore = new DB(this.config.datadir);
+    this.crawler = new Crawler(this.config.network);
 
     process.on('SIGINT', async () => {
       await this.shutdown();
@@ -33,12 +38,41 @@ class App {
     try {
       this.vault = await initVault(this.config.datadir);
 
+      this.crawler.on(
+        'crawler.deposit',
+        async (walletAddress: string, pair: Array<UtxoInterface>) => {
+          const { market, network } = this.config;
+          const model = new Markets(this.datastore.markets);
+
+          const baseAsset = market.baseAsset[network];
+          const { baseFundingTx, quoteFundingTx, quoteAsset } = schemaFromPair(
+            baseAsset,
+            pair
+          );
+
+          this.logger.info(
+            `New deposit for market ${quoteAsset} on address ${walletAddress}`
+          );
+
+          await model.updateMarketByWallet(
+            { walletAddress },
+            {
+              baseAsset,
+              quoteAsset,
+              baseFundingTx,
+              quoteFundingTx,
+              fee: market.fee,
+              tradable: true,
+            }
+          );
+        }
+      );
+
       this.operatorGrpc = new OperatorServer(
         this.datastore,
         this.vault,
-        {},
+        this.crawler,
         this.config.network,
-        this.config.market,
         this.logger
       );
       this.tradeGrpc = new TradeServer(
