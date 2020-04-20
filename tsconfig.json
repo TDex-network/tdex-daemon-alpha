@@ -5,6 +5,7 @@
     "outDir": "./dist",
     "sourceMap": true,
     "strict": true,
+    "allowJs": true,
     "esModuleInterop": true,
     "importHelpers": true,
     "declaration": true,
