@@ -22,11 +22,6 @@
     "noFallthroughCasesInSwitch": true,
     "moduleResolution": "node"
   },
-  "include": [
-    "src/**/*.ts"
-  ],
-  "exclude": [
-    "**/*.spec.ts",
-    "node_modules/**/*"
-  ]
+  "include": ["src/**/*"],
+  "exclude": ["**/*.spec.ts", "node_modules/**/*"]
 }
