@@ -10,7 +10,7 @@
     "build": "npx tsc",
     "start": "npx ts-node src",
     "lint": "bash scripts/lint",
-    "clean": "bashs scripts/clean",
+    "clean": "bash scripts/clean",
     "test": "bash scripts/test",
     "protobuf": "bash scripts/compile-proto"
   },
