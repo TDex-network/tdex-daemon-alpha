@@ -2,40 +2,33 @@ import * as grpc from 'grpc';
 
 import * as services from 'tdex-protobuf/js/trade_grpc_pb';
 import * as messages from 'tdex-protobuf/js/trade_pb';
-import { SwapRequest } from 'tdex-protobuf/js/swap_pb';
-import { Swap } from 'tdex-sdk';
+import { SwapRequest, SwapComplete } from 'tdex-protobuf/js/swap_pb';
 
 const traderClient = new services.TradeClient(
   'localhost:9945',
   grpc.credentials.createInsecure()
 );
 
+/**
+ * tradePropose
+ * @param market
+ * @param tradeType
+ * @param swapRequestSerialized
+ */
+
 export function tradePropose(
   { baseAsset, quoteAsset }: any,
-  {
-    assetToBeSent,
-    amountToBeSent,
-    assetToReceive,
-    amountToReceive,
-    psbtBase64,
-  }: any
+  tradeType: number,
+  swapRequestSerialized: Uint8Array
 ): Promise<any> {
   return new Promise((resolve, reject) => {
-    const type = assetToReceive === baseAsset ? 0 : 1;
     const market = new messages.Market();
     market.setBaseAsset(baseAsset);
     market.setQuoteAsset(quoteAsset);
-    const swap = new Swap({ chain: 'regtest' });
-    const swapRequestSerialized = swap.request({
-      assetToBeSent,
-      amountToBeSent,
-      assetToReceive,
-      amountToReceive,
-      psbtBase64,
-    });
+
     const request = new messages.TradeProposeRequest();
     request.setMarket(market);
-    request.setType(type);
+    request.setType(tradeType);
     request.setSwapRequest(
       SwapRequest.deserializeBinary(swapRequestSerialized)
     );
@@ -47,6 +40,27 @@ export function tradePropose(
       data = swapAcceptMsg!.serializeBinary();
     });
 
+    call.on('end', () => resolve(data));
+    call.on('error', (e) => reject(e));
+  });
+}
+
+/**
+ * tradeComplete
+ * @param swapCompleteSerialized
+ */
+
+export function tradeComplete(
+  swapCompleteSerialized: Uint8Array
+): Promise<any> {
+  return new Promise((resolve, reject) => {
+    const request = new messages.TradeCompleteRequest();
+    request.setMsg(SwapComplete.deserializeBinary(swapCompleteSerialized));
+    const call = traderClient.tradeComplete(request);
+    let data: string;
+    call.on('data', (reply) => {
+      data = reply!.getTxid();
+    });
     call.on('end', () => resolve(data));
     call.on('error', (e) => reject(e));
   });

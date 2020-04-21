@@ -1,16 +1,6 @@
 import axios from 'axios';
 // Nigiri Chopstick Liquid base URI
-const APIURL = `http://localhost:3001`;
-
-function prepareVaultConfig() {
-  return JSON.stringify({
-    keystore: {
-      value:
-        'thunder plunge flower caution swap cake dice master spatial gadget horn solar law scale tree update area stem odor evolve famous journey hunt symbol',
-      isEncrypted: false,
-    },
-  });
-}
+const APIURL = process.env.EXPLORER || `http://localhost:3001`;
 
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -30,20 +20,38 @@ function utxosByAsset(utxos: any[], asset: any) {
 }
 
 async function faucet(address: any) {
-  await axios.post(`${APIURL}/faucet`, { address });
-  await sleep(200);
+  try {
+    await axios.post(`${APIURL}/faucet`, { address });
+    await sleep(3000);
+  } catch (e) {
+    console.error(e);
+    throw e;
+  }
 }
 
 async function mint(address: any, quantity: number): Promise<string> {
-  const response = await axios.post(`${APIURL}/mint`, { address, quantity });
-  await sleep(200);
-  const { asset } = response.data;
-  return asset;
+  let ret;
+  try {
+    const response = await axios.post(`${APIURL}/mint`, { address, quantity });
+    await sleep(3000);
+    const { asset } = response.data;
+    ret = asset;
+  } catch (e) {
+    console.error(e);
+    throw e;
+  }
+  return ret;
 }
 
 async function fetchUtxos(address: any, asset: any): Promise<Array<any>> {
-  await sleep(2000);
-  const utxos = (await axios.get(`${APIURL}/address/${address}/utxo`)).data;
+  let utxos;
+  try {
+    await sleep(5000);
+    utxos = (await axios.get(`${APIURL}/address/${address}/utxo`)).data;
+  } catch (e) {
+    console.error(e);
+    throw e;
+  }
   return utxosByAsset(utxos, asset);
 }
 
@@ -77,12 +85,4 @@ async function pushTx(hex: any): Promise<string> {
   }
 }
 
-export {
-  mint,
-  sleep,
-  faucet,
-  pushTx,
-  fetchUtxos,
-  prepareVaultConfig,
-  bufferFromAssetHash,
-};
+export { mint, sleep, faucet, pushTx, fetchUtxos, bufferFromAssetHash };
