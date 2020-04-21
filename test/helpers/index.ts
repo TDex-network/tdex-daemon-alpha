@@ -1,14 +1,19 @@
 import axios from 'axios';
-// Nigiri Chopstick Liquid base URI 
-const APIURL = `http://localhost:3001`
-
+// Nigiri Chopstick Liquid base URI
+const APIURL = `http://localhost:3001`;
 
 function prepareVaultConfig() {
-  return JSON.stringify({"keystore": {"value": "thunder plunge flower caution swap cake dice master spatial gadget horn solar law scale tree update area stem odor evolve famous journey hunt symbol", "isEncrypted": false}});
+  return JSON.stringify({
+    keystore: {
+      value:
+        'thunder plunge flower caution swap cake dice master spatial gadget horn solar law scale tree update area stem odor evolve famous journey hunt symbol',
+      isEncrypted: false,
+    },
+  });
 }
 
 function sleep(ms: number) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 function bufferFromAssetHash(hash: string) {
@@ -20,37 +25,34 @@ function bufferFromAssetHash(hash: string) {
 
 function utxosByAsset(utxos: any[], asset: any) {
   return utxos.filter(function (utxo) {
-    return utxo.asset === asset
-  })
+    return utxo.asset === asset;
+  });
 }
 
 async function faucet(address: any) {
   await axios.post(`${APIURL}/faucet`, { address });
-  await sleep(200)
+  await sleep(200);
 }
 
 async function mint(address: any, quantity: number): Promise<string> {
   const response = await axios.post(`${APIURL}/mint`, { address, quantity });
-  await sleep(200)
+  await sleep(200);
   const { asset } = response.data;
   return asset;
 }
 
 async function fetchUtxos(address: any, asset: any): Promise<Array<any>> {
-  await sleep(2000)
+  await sleep(2000);
   const utxos = (await axios.get(`${APIURL}/address/${address}/utxo`)).data;
   return utxosByAsset(utxos, asset);
 }
 
 async function pushTx(hex: any): Promise<string> {
-
-  let result
+  let result;
   try {
-    result = await axios.post(
-      `${APIURL}/tx`,
-      hex,
-      { headers: { 'Content-Type': 'text/plain' } }
-    );
+    result = await axios.post(`${APIURL}/tx`, hex, {
+      headers: { 'Content-Type': 'text/plain' },
+    });
 
     return result.data.txId;
   } catch (error) {
@@ -73,9 +75,7 @@ async function pushTx(hex: any): Promise<string> {
       throw new Error(error.message);
     }
   }
-
 }
-
 
 export {
   mint,
@@ -85,4 +85,4 @@ export {
   fetchUtxos,
   prepareVaultConfig,
   bufferFromAssetHash,
-}
+};

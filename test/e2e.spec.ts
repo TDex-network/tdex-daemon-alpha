@@ -1,6 +1,6 @@
 import App from '../src/app';
 import { feeDepositAddress, depositAddress } from './grpc/operator';
-import { sleep, faucet, mint, fetchUtxos } from './helpers'
+import { sleep, faucet, mint, fetchUtxos } from './helpers';
 //import { fromWIF } from '../src/components/wallet';
 import { networks } from 'liquidjs-lib';
 import { calculateExpectedAmount } from '../src/components/trade';
@@ -8,9 +8,11 @@ import { markets, balances, tradePropose } from './grpc/trader';
 import { toSatoshi, fromSatoshi } from '../src/utils';
 import Wallet, { fromWIF, WalletInterface } from '../src/components/wallet';
 
-
 describe('End to end testing', () => {
-  const traderWallet: WalletInterface = fromWIF("cSv4PQtTpvYKHjfp9qih2RMeieBQAVADqc8JGXPvA7mkJ8yD5QC1", networks.regtest);
+  const traderWallet: WalletInterface = fromWIF(
+    'cSv4PQtTpvYKHjfp9qih2RMeieBQAVADqc8JGXPvA7mkJ8yD5QC1',
+    networks.regtest
+  );
   const app = new App();
   const LBTC = networks.regtest.assetHash;
   // Start the daemon
@@ -23,18 +25,20 @@ describe('End to end testing', () => {
     }
   });
 
-
   it('Call the public markets endpoint', async () => {
-
     // Get the address of the fee service
     const feeAddress = await feeDepositAddress();
-    expect(feeAddress).toStrictEqual('ert1qv7qjzqg8pzda9c0g288h8jsjfsfey8gnmsr3wq');
+    expect(feeAddress).toStrictEqual(
+      'ert1qv7qjzqg8pzda9c0g288h8jsjfsfey8gnmsr3wq'
+    );
     // Fund the fee wallet
     await faucet(feeAddress);
 
     // Get an address for creating a new market
     const marketAddress = await depositAddress();
-    expect(marketAddress).toStrictEqual('ert1q55ym7rly2ctjpjjedz0lv7yh5nwws6y39ctdga');
+    expect(marketAddress).toStrictEqual(
+      'ert1q55ym7rly2ctjpjjedz0lv7yh5nwws6y39ctdga'
+    );
 
     //fund the market with 1 LBTC and 6500 tokens
     await faucet(marketAddress);
@@ -81,25 +85,28 @@ describe('End to end testing', () => {
       amountToBeSent: fromSatoshi(amountToBeSent),
       assetToReceive: USDT,
       amountToReceive: fromSatoshi(amountToReceive),
-      psbtBase64   
+      psbtBase64,
     };
 
     const swapAcceptMsg: Uint8Array = await tradePropose(market, proposal);
     expect(swapAcceptMsg).toBeDefined();
-  }, 20000)
+  }, 20000);
 
   test('Calculate expected amount', () => {
     // balanceP, balanceR, amountP, fee
-    const expectedAmount = calculateExpectedAmount(100150000, 649028894159, 300000, 0.25);
+    const expectedAmount = calculateExpectedAmount(
+      100150000,
+      649028894159,
+      300000,
+      0.25
+    );
     expect(expectedAmount).toStrictEqual(1933518134);
-  })
+  });
 
   afterAll(async () => {
     app.datastore.close();
     await app.crawler.stopAll();
-    await app.operatorGrpc.close()
-    await app.tradeGrpc.close()
-  })
-
-})
-
+    await app.operatorGrpc.close();
+    await app.tradeGrpc.close();
+  });
+});

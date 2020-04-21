@@ -8,8 +8,8 @@
   "scripts": {
     "watch": "npx tsc --watch",
     "build": "npx tsc",
-    "lint": "npx tsc --noEmit && npx eslint 'src/**/*.ts' --quiet",
     "start": "npx ts-node src",
+    "lint": "bash scripts/lint",
     "clean": "bashs scripts/clean",
     "test": "bash scripts/test",
     "protobuf": "bash scripts/compile-proto"
@@ -57,16 +57,15 @@
     "testEnvironment": "node",
     "moduleFileExtensions": [
       "ts",
-      "tsx",
       "js"
     ],
     "transform": {
-      "\\.(ts|tsx)$": "ts-jest"
+      "\\.(ts)$": "ts-jest"
     }
   },
   "husky": {
     "hooks": {
-      "pre-commit": "yarn lint"
+      "pre-commit": "bash scripts/lint"
     }
   }
 }
