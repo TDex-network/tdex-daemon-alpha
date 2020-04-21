@@ -1,10 +1,26 @@
-//import App from '../src/app';
+import App from '../src/app';
 import { fromWIF } from '../src/components/wallet';
 import { networks } from 'liquidjs-lib';
 import { calculateExpectedAmount } from '../src/components/trade';
 
 
 describe('End to end testing', () => {
+  
+  const app = new App();
+  // Start the daemon
+  beforeAll(async () => {
+    try {
+      await app.start();
+    } catch (err) {
+      app.logger.error(err.message);
+    }
+  }, 5000);
+
+
+  it('Call the public markets endpoint', async () => {
+    const traderWallet = fromWIF("cSv4PQtTpvYKHjfp9qih2RMeieBQAVADqc8JGXPvA7mkJ8yD5QC1", networks.regtest);
+    
+  })
 
   test('Calculate expected amount', () => {
     // balanceP, balanceR, amountP, fee
