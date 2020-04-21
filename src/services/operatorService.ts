@@ -50,7 +50,7 @@ class Operator {
 
   async feeDepositAddress(
     _: any,
-    callback: grpc.sendUnaryData<DepositAddressReply>
+    callback: grpc.sendUnaryData<FeeDepositAddressReply>
   ): Promise<void> {
     try {
       // We use everytime the 0 index of the account 1
