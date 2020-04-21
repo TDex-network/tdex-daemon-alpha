@@ -1,7 +1,10 @@
 import grpc from 'grpc';
 
 import { OperatorService } from '../proto/operator_grpc_pb';
-import { DepositAddressReply } from '../proto/operator_pb';
+import {
+  DepositAddressReply,
+  FeeDepositAddressReply,
+} from '../proto/operator_pb';
 import Markets from '../models/markets';
 import { DBInterface } from '../db/datastore';
 import { VaultInterface } from '../components/vault';
@@ -39,6 +42,28 @@ class Operator {
 
       const reply = new DepositAddressReply();
       reply.setAddress(nextWallet.address);
+      callback(null, reply);
+    } catch (e) {
+      return callback(e, null);
+    }
+  }
+
+  async feeDepositAddress(
+    _: any,
+    callback: grpc.sendUnaryData<FeeDepositAddressReply>
+  ): Promise<void> {
+    try {
+      // We use everytime the 0 index of the account 1
+      const derivationIndex = 0;
+      const isFeeAccount = true;
+      const feeWallet = this.vault.derive(
+        derivationIndex,
+        this.network,
+        isFeeAccount
+      );
+
+      const reply = new FeeDepositAddressReply();
+      reply.setAddress(feeWallet.address);
       callback(null, reply);
     } catch (e) {
       return callback(e, null);
