@@ -2,6 +2,11 @@ import axios from 'axios';
 // Nigiri Chopstick Liquid base URI 
 const APIURL = `http://localhost:3001`
 
+
+function prepareVaultConfig() {
+  return JSON.stringify({"keystore": {"value": "thunder plunge flower caution swap cake dice master spatial gadget horn solar law scale tree update area stem odor evolve famous journey hunt symbol", "isEncrypted": false}});
+}
+
 function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -24,8 +29,8 @@ async function faucet(address: any) {
   await sleep(200)
 }
 
-async function mint(address: any): Promise<string> {
-  const response = await axios.post(`${APIURL}/faucet`, { address });
+async function mint(address: any, quantity: number): Promise<string> {
+  const response = await axios.post(`${APIURL}/mint`, { address, quantity });
   await sleep(200)
   const { asset } = response.data;
   return asset;
@@ -74,5 +79,10 @@ async function pushTx(hex: any): Promise<string> {
 
 export {
   mint,
-  faucet
+  sleep,
+  faucet,
+  pushTx,
+  fetchUtxos,
+  prepareVaultConfig,
+  bufferFromAssetHash,
 }

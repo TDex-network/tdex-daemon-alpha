@@ -10,7 +10,8 @@
     "build": "npx tsc",
     "lint": "npx tsc --noEmit && npx eslint 'src/**/*.ts' --quiet",
     "start": "npx ts-node src",
-    "test": "npx jest test",
+    "clean": "bashs scripts/clean",
+    "test": "bash scripts/test",
     "protobuf": "bash scripts/compile-proto"
   },
   "dependencies": {
@@ -30,7 +31,7 @@
   "devDependencies": {
     "@types/google-protobuf": "^3.7.2",
     "@types/nedb": "^1.8.9",
-    "@types/node": "^13.13.0",
+    "@types/node": "^13.13.1",
     "@types/winston": "^2.4.4",
     "@typescript-eslint/eslint-plugin": "^2.28.0",
     "@typescript-eslint/parser": "^2.28.0",

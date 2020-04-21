@@ -1,4 +1,7 @@
 import axios from 'axios';
+import { URL } from "url";
+
+
 
 export const EXPLORER_URL = {
   liquid: 'https://blockstream.info/liquid/api',
@@ -18,7 +21,24 @@ export function isValidNetwork(n: string) {
   return availableNetworks.includes(n);
 }
 
+const isValidUrl = (s: string) => {
+  try {
+    new URL(s);
+    return true;
+  } catch (err) {
+    return false;
+  }
+};
+
 function urlFromNetwork(n: string): string {
+  const { EXPLORER } = process.env;
+  if (EXPLORER)
+    if (isValidUrl(EXPLORER))
+      return EXPLORER;
+    else 
+      throw new Error('Not a valid explorer URL');
+
+
   if (!isValidNetwork(n))
     throw new Error('Network not support by the explorer');
 

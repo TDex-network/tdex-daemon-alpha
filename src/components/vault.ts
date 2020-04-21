@@ -95,6 +95,7 @@ async function generateSeedAndSave(filepath: string): Promise<void> {
     isEncrypted = true;
   } else {
     value = mnemonic;
+    isEncrypted = false;
   }
 
   fs.writeFileSync(

@@ -94,6 +94,7 @@ class App {
     this.logger.warn('Shutting down...');
     this.datastore.close();
 
+    await this.crawler.stopAll();
     await this.tradeGrpc.close();
     await this.operatorGrpc.close();
 

@@ -191,6 +191,12 @@ export default class Wallet implements WalletInterface {
 
     return psbt.extractTransaction().toHex();
   }
+
+  static createTx(): string {
+    let psbt = new Psbt();
+    return psbt.toBase64()
+  }
+  
 }
 
 export function fromWIF(wif: string, network: Network): WalletInterface {
