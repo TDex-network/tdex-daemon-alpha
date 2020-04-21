@@ -26,6 +26,28 @@ function deserialize_DepositAddressRequest(buffer_arg) {
   return src_proto_operator_pb.DepositAddressRequest.deserializeBinary(new Uint8Array(buffer_arg));
 }
 
+function serialize_FeeDepositAddressReply(arg) {
+  if (!(arg instanceof src_proto_operator_pb.FeeDepositAddressReply)) {
+    throw new Error('Expected argument of type FeeDepositAddressReply');
+  }
+  return Buffer.from(arg.serializeBinary());
+}
+
+function deserialize_FeeDepositAddressReply(buffer_arg) {
+  return src_proto_operator_pb.FeeDepositAddressReply.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
+function serialize_FeeDepositAddressRequest(arg) {
+  if (!(arg instanceof src_proto_operator_pb.FeeDepositAddressRequest)) {
+    throw new Error('Expected argument of type FeeDepositAddressRequest');
+  }
+  return Buffer.from(arg.serializeBinary());
+}
+
+function deserialize_FeeDepositAddressRequest(buffer_arg) {
+  return src_proto_operator_pb.FeeDepositAddressRequest.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
 
 var OperatorService = exports.OperatorService = {
   depositAddress: {
@@ -38,6 +60,17 @@ var OperatorService = exports.OperatorService = {
     requestDeserialize: deserialize_DepositAddressRequest,
     responseSerialize: serialize_DepositAddressReply,
     responseDeserialize: deserialize_DepositAddressReply,
+  },
+  feeDepositAddress: {
+    path: '/Operator/FeeDepositAddress',
+    requestStream: false,
+    responseStream: false,
+    requestType: src_proto_operator_pb.FeeDepositAddressRequest,
+    responseType: src_proto_operator_pb.FeeDepositAddressReply,
+    requestSerialize: serialize_FeeDepositAddressRequest,
+    requestDeserialize: deserialize_FeeDepositAddressRequest,
+    responseSerialize: serialize_FeeDepositAddressReply,
+    responseDeserialize: deserialize_FeeDepositAddressReply,
   },
 };
 
