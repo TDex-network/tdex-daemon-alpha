@@ -210,7 +210,7 @@ class Trade {
       });
 
       const reply = new TradeProposeReply();
-      reply.setMsg(swapAcceptMessage);
+      reply.setSwapAccept(swapAcceptMessage);
       call.write(reply);
       call.end();
     } catch (e) {
@@ -231,7 +231,7 @@ class Trade {
     const marketModel = new Markets(this.datastore.markets);
     const swapModel = new Swaps(this.datastore.swaps);
     try {
-      const swapComplete = call.request.getMsg();
+      const swapComplete = call.request.getSwapComplete();
       const swapAcceptId = swapComplete!.getAcceptId();
       if (!swapComplete || !swapAcceptId)
         throw {
