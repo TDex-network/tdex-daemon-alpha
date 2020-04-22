@@ -7,6 +7,6 @@ pushd $PARENT_PATH
 rm -f tdex-daemon-*
 yarn clean
 yarn build
-npx nexe --build dist/index.js -t $1 -o tdex-daemon-$1
+npx nexe dist/index.js -t $1 -o tdex-daemon-$1
 
 popd

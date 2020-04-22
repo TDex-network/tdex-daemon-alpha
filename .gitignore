@@ -1,5 +1,6 @@
 dist
 .DS_Store
+tdex-daemon-*
 /test/datadir/db
 /test/datadir/config.json
 # Logs
