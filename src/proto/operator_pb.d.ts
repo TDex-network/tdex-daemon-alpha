@@ -1,5 +1,5 @@
 // package: 
-// file: src/proto/operator.proto
+// file: operator.proto
 
 import * as jspb from "google-protobuf";
 

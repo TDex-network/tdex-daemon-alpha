@@ -175,8 +175,9 @@ class Trade {
       );
 
       // For now we assume to use only the 0 index for the fee wallet
-      const bitcoinAssetHash = (networks as any)[this.network].assetHash;
       const feeWallet = this.vault.derive(0, this.network, true);
+      // Liquid Bitcoin asset hash
+      const bitcoinAssetHash = (networks as any)[this.network].assetHash;
       const feeUtxos = await fetchUtxos(
         feeWallet.address,
         this.network,

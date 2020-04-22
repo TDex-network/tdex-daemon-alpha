@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -e
+
+PARENT_PATH=$(dirname $(cd $(dirname $0); pwd -P))
+
+pushd $PARENT_PATH
+
+npx tsc --noEmit && npx eslint 'src/**/*.ts' 'test/**/*.ts' --quiet $1
+
+popd

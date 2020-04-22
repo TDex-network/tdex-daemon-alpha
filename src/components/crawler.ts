@@ -21,7 +21,7 @@ export default class Crawler extends EventEmitter implements CrawlerInterface {
   storage: any;
   timer: any;
 
-  constructor(private network: string, private interval: number = 2000) {
+  constructor(private network: string, private interval: number = 200) {
     super();
 
     if (!isValidNetwork(this.network))

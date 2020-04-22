@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -e
+
+PARENT_PATH=$(dirname $(cd $(dirname $0); pwd -P))
+
+pushd $PARENT_PATH
+
+nigiri stop --delete
+nigiri start --liquid
+sleep 10s
+yarn clean
+export TDEX_DAEMON_PATH=$(pwd)/test/datadir 
+export EXPLORER=http://localhost:3001 
+npx jest test --detectOpenHandles
+
+popd

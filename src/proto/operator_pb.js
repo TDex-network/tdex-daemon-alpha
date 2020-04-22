@@ -1,4 +1,4 @@
-// source: src/proto/operator.proto
+// source: operator.proto
 /**
  * @fileoverview
  * @enhanceable

@@ -17,3 +17,14 @@ export function toNumber(x: Buffer): number {
 export function toSatoshi(x: number): number {
   return Math.floor(x * Math.pow(10, 8));
 }
+
+export function fromSatoshi(x: number): number {
+  return Number(
+    (x / Math.pow(10, 8))
+      .toLocaleString('en-US', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 8,
+      })
+      .replace(',', '')
+  );
+}
