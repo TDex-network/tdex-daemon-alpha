@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -ex
+
+PARENT_PATH=$(dirname $(cd $(dirname $0); pwd -P))
+pushd $PARENT_PATH
+
+rm -f tdex-daemon-*
+yarn clean
+yarn build
+npx nexe --build dist/index.js -t $1 -o tdex-daemon-$1
+
+popd
