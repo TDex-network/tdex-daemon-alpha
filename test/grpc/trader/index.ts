@@ -35,8 +35,8 @@ export function tradePropose(
 
     const call = traderClient.tradePropose(request);
     let data: Uint8Array;
-    call.on('data', (reply) => {
-      const swapAcceptMsg = reply!.getMsg();
+    call.on('data', (reply: messages.TradeProposeReply) => {
+      const swapAcceptMsg = reply!.getSwapAccept();
       data = swapAcceptMsg!.serializeBinary();
     });
 
@@ -55,7 +55,7 @@ export function tradeComplete(
 ): Promise<any> {
   return new Promise((resolve, reject) => {
     const request = new messages.TradeCompleteRequest();
-    request.setMsg(SwapComplete.deserializeBinary(swapCompleteSerialized));
+    request.setSwapComplete(SwapComplete.deserializeBinary(swapCompleteSerialized));
     const call = traderClient.tradeComplete(request);
     let data: string;
     call.on('data', (reply) => {
