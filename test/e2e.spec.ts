@@ -1,7 +1,6 @@
 import App from '../src/app';
 import { feeDepositAddress, depositAddress } from './grpc/operator';
 import { sleep, faucet, mint, fetchUtxos } from './helpers';
-//import { fromWIF } from '../src/components/wallet';
 import { networks } from 'liquidjs-lib';
 import { markets, balances, tradePropose, tradeComplete } from './grpc/trader';
 import Wallet, { fromWIF, WalletInterface } from '../src/components/wallet';
@@ -90,7 +89,7 @@ describe('End to end testing', () => {
       psbtBase64,
     });
 
-    // 0 === Buy === receiving base_asset; 1 === sell === receiving base_asset
+    // 0 === Buy === receiving base_asset; 1 === sell === receiving quote_asset
     const tradeType = 1;
     const swapAcceptSerialized: Uint8Array = await tradePropose(
       market,
@@ -115,7 +114,6 @@ describe('End to end testing', () => {
 
     // Trader call the tradeComplete endpoint to finalize the swap
     const txid = await tradeComplete(swapCompleteSerialized);
-    console.log(txid);
     expect(txid).toBeDefined();
 
     // check if market got back to be tradabale
