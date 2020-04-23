@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 /**
 Liquidity providers can spin up the alpha-daemon with custom configuration file, which has the following features:
   0. Load from Seed/Create Seed

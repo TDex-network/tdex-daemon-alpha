@@ -5,6 +5,9 @@
   "main": "dist/index.js",
   "author": "Marco Argentieri",
   "license": "MIT",
+  "bin": {
+    "tdex-daemon": "./dist/index.js"
+  },
   "scripts": {
     "watch": "npx tsc --watch",
     "build": "npx tsc",
@@ -30,6 +33,7 @@
   },
   "devDependencies": {
     "@types/google-protobuf": "^3.7.2",
+    "@types/jest": "^25.2.1",
     "@types/nedb": "^1.8.9",
     "@types/node": "^13.13.1",
     "@types/winston": "^2.4.4",

@@ -1,13 +1,10 @@
 import App from '../src/app';
 import { feeDepositAddress, depositAddress } from './grpc/operator';
 import { sleep, faucet, mint, fetchUtxos } from './helpers';
-//import { fromWIF } from '../src/components/wallet';
 import { networks } from 'liquidjs-lib';
-import { calculateExpectedAmount } from '../src/components/trade';
 import { markets, balances, tradePropose, tradeComplete } from './grpc/trader';
-import { toSatoshi, fromSatoshi } from '../src/utils';
 import Wallet, { fromWIF, WalletInterface } from '../src/components/wallet';
-import { Swap } from 'tdex-sdk';
+import { Swap, calculateExpectedAmount } from 'tdex-sdk';
 import { SwapAccept } from 'tdex-protobuf/js/swap_pb';
 
 describe('End to end testing', () => {
@@ -58,10 +55,10 @@ describe('End to end testing', () => {
 
     const { baseAsset, quoteAsset } = market;
     const balancesAndFee = await balances({ baseAsset, quoteAsset });
-    expect(balancesAndFee.balances[baseAsset]).toStrictEqual(toSatoshi(1));
-    expect(balancesAndFee.balances[quoteAsset]).toStrictEqual(toSatoshi(6800));
+    expect(balancesAndFee.balances[baseAsset]).toStrictEqual(100000000);
+    expect(balancesAndFee.balances[quoteAsset]).toStrictEqual(680000000000);
 
-    const amountToBeSent = toSatoshi(0.0001);
+    const amountToBeSent = 10000;
     const amountToReceive = calculateExpectedAmount(
       balancesAndFee.balances[baseAsset],
       balancesAndFee.balances[quoteAsset],
@@ -86,13 +83,13 @@ describe('End to end testing', () => {
     const swap = new Swap({ chain: 'regtest' });
     const swapRequestSerialized = swap.request({
       assetToBeSent: LBTC,
-      amountToBeSent: fromSatoshi(amountToBeSent),
+      amountToBeSent: amountToBeSent,
       assetToReceive: USDT,
-      amountToReceive: fromSatoshi(amountToReceive),
+      amountToReceive: amountToReceive,
       psbtBase64,
     });
 
-    // 0 === Buy === receiving base_asset; 1 === sell === receiving base_asset
+    // 0 === Buy === receiving base_asset; 1 === sell === receiving quote_asset
     const tradeType = 1;
     const swapAcceptSerialized: Uint8Array = await tradePropose(
       market,
@@ -117,7 +114,6 @@ describe('End to end testing', () => {
 
     // Trader call the tradeComplete endpoint to finalize the swap
     const txid = await tradeComplete(swapCompleteSerialized);
-    console.log(txid);
     expect(txid).toBeDefined();
 
     // check if market got back to be tradabale
@@ -128,12 +124,12 @@ describe('End to end testing', () => {
   test('Calculate expected amount', () => {
     // balanceP, balanceR, amountP, fee
     const expectedAmount = calculateExpectedAmount(
-      100150000,
-      649028894159,
-      300000,
+      100000000,
+      650000000000,
+      10000,
       0.25
     );
-    expect(expectedAmount).toStrictEqual(1933518134);
+    expect(expectedAmount).toStrictEqual(64831026);
   });
 
   afterAll(async () => {

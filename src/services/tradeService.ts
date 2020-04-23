@@ -1,5 +1,5 @@
 import grpc from 'grpc';
-import { Swap } from 'tdex-sdk';
+import { Swap, calculateExpectedAmount } from 'tdex-sdk';
 
 import {
   Balance,
@@ -20,7 +20,6 @@ import Markets from '../models/markets';
 import { DBInterface } from '../db/datastore';
 import { fetchBalances, fetchUtxos, pushTx } from '../utils';
 import { VaultInterface } from '../components/vault';
-import { calculateExpectedAmount } from '../components/trade';
 import { networks } from 'liquidjs-lib';
 import Swaps from '../models/swaps';
 import Wallet from '../components/wallet';
