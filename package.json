@@ -5,6 +5,9 @@
   "main": "dist/index.js",
   "author": "Marco Argentieri",
   "license": "MIT",
+  "bin": {
+    "tdex-daemon": "./dist/index.js"
+  },
   "scripts": {
     "watch": "npx tsc --watch",
     "build": "npx tsc",

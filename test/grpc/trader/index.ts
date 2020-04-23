@@ -55,7 +55,9 @@ export function tradeComplete(
 ): Promise<any> {
   return new Promise((resolve, reject) => {
     const request = new messages.TradeCompleteRequest();
-    request.setSwapComplete(SwapComplete.deserializeBinary(swapCompleteSerialized));
+    request.setSwapComplete(
+      SwapComplete.deserializeBinary(swapCompleteSerialized)
+    );
     const call = traderClient.tradeComplete(request);
     let data: string;
     call.on('data', (reply) => {
