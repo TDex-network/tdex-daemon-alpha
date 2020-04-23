@@ -1,26 +1,25 @@
 # 💸 tdex-daemon-alpha
-
-Alpha Daemon implementation for Liquidity Providers to execute automated market marking strategies on top of TDEX
+Alpha Daemon implementation to execute automated market marking strategies on top of TDEX
 
 ## Usage
 
-- Install with **npm**
+* Install with **npm**
 
 ```sh
 $ npm install --g tdex-daemon
 ```
 
-- Download standalone binary (nodejs/npm not needed)
+* Download standalone binary (nodejs/npm not needed)
 
 [Download latest release (Mac or Linux)](https://github.com/Sevenlab/tdex-daemon-alpha/releases)
 
 ## 🛣 Roadmap
 
-- [ ] Swap protocol
-- [ ] Trade protocol
-- [ ] Wallet
-- [ ] Crawler
-- [ ] Market making
+* [x] Swap protocol
+* [x] Trade protocol
+* [x] Wallet
+* [x] Crawler
+* [x] Market making
 
 ## 🖥 Local Development
 
