@@ -71,7 +71,8 @@ export function coinselect(utxos, amount) {
     if (availableSat >= amount) break;
   }
 
-  if (availableSat < amount) throw 'You do not have enough in your wallet';
+  if (availableSat < amount)
+    throw new Error('You do not have enough in your wallet');
 
   change = availableSat - amount;
 

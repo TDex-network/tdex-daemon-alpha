@@ -62,6 +62,8 @@ export default class Wallet implements WalletInterface {
     inputAsset: string,
     outputAsset: string
   ): string {
+    if (inputs.length === 0) throw new Error('Swap: No utxos available');
+
     let psbt: Psbt;
     try {
       psbt = Psbt.fromBase64(psbtBase64);
@@ -116,6 +118,8 @@ export default class Wallet implements WalletInterface {
   }
 
   payFees(psbtBase64: string, utxos: any[]): string {
+    if (utxos.length === 0) throw new Error('Fees: No utxos available');
+
     const psbt = Psbt.fromBase64(psbtBase64);
     const tx = Transaction.fromBuffer(psbt.data.getTransaction());
     const { fees } = calculateFees(tx.ins.length + 1, tx.outs.length + 2);
