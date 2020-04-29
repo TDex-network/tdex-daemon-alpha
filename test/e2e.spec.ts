@@ -4,7 +4,11 @@ import { sleep, faucet, mint, fetchUtxos } from './helpers';
 import { networks } from 'liquidjs-lib';
 import { markets, balances, tradePropose, tradeComplete } from './grpc/trader';
 import Wallet, { fromWIF, WalletInterface } from '../src/components/wallet';
-import { Swap, calculateExpectedAmount } from 'tdex-sdk';
+import {
+  Swap,
+  calculateExpectedAmount,
+  calculateProposeAmount,
+} from 'tdex-sdk';
 import { SwapAccept } from 'tdex-protobuf/js/swap_pb';
 
 describe('End to end testing', () => {
@@ -119,7 +123,66 @@ describe('End to end testing', () => {
     // check if market got back to be tradabale
     const tradableMarketsAgain = await markets();
     expect(tradableMarketsAgain.length).toStrictEqual(1);
-  }, 35000);
+
+    /**
+     * Now let's try to BUY
+     */
+
+    const balancesAndFee2 = await balances({ baseAsset, quoteAsset });
+    const amountToReceive2 = 5000;
+    const amountToBeSent2 = calculateProposeAmount(
+      balancesAndFee2.balances[quoteAsset],
+      balancesAndFee2.balances[baseAsset],
+      amountToReceive2,
+      balancesAndFee.fee
+    );
+    const traderUtxos2 = await fetchUtxos(traderWallet.address, USDT);
+    const emptyPsbt2 = Wallet.createTx();
+    const psbt2 = traderWallet.updateTx(
+      emptyPsbt2,
+      traderUtxos2,
+      amountToBeSent2,
+      amountToReceive2,
+      USDT,
+      LBTC
+    );
+    const swap2 = new Swap({ chain: 'regtest' });
+    const swapRequestSerialized2 = swap2.request({
+      assetToBeSent: USDT,
+      amountToBeSent: amountToBeSent2,
+      assetToReceive: LBTC,
+      amountToReceive: amountToReceive2,
+      psbtBase64: psbt2,
+    });
+    // 0 === Buy === receiving base_asset; 1 === sell === receiving quote_asset
+    const tradeType2 = 0;
+    const swapAcceptSerialized2: Uint8Array = await tradePropose(
+      market,
+      tradeType2,
+      swapRequestSerialized2
+    );
+
+    // trader need to check the signed inputs by the provider
+    // and add his own inputs if all is correct
+    const swapAcceptMessage2 = SwapAccept.deserializeBinary(
+      swapAcceptSerialized2
+    );
+    const transaction2 = swapAcceptMessage2.getTransaction();
+    const signedPsbt2 = traderWallet.sign(transaction2);
+
+    // Trader  adds his signed inputs to the transaction
+    const swapCompleteSerialized2 = swap2.complete({
+      message: swapAcceptSerialized2,
+      psbtBase64: signedPsbt2,
+    });
+
+    // Trader call the tradeComplete endpoint to finalize the swap
+    const txid2 = await tradeComplete(swapCompleteSerialized2);
+    expect(txid2).toBeDefined();
+    // check if market got back to be tradabale
+    const tradableMarketsAgain2 = await markets();
+    expect(tradableMarketsAgain2.length).toStrictEqual(1);
+  }, 55000);
 
   test('Calculate expected amount', () => {
     // balanceP, balanceR, amountP, fee

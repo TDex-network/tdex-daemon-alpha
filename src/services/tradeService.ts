@@ -1,5 +1,9 @@
 import grpc from 'grpc';
-import { Swap, calculateExpectedAmount } from 'tdex-sdk';
+import {
+  Swap,
+  calculateExpectedAmount,
+  calculateProposeAmount,
+} from 'tdex-sdk';
 
 import {
   Balance,
@@ -111,6 +115,7 @@ class Trade {
     let quoteAsset = undefined;
     try {
       const market = call.request.getMarket();
+      const tradeType = call.request.getType();
       const swapRequestMessage = call.request.getSwapRequest();
       if (!market || !swapRequestMessage)
         throw {
@@ -147,16 +152,28 @@ class Trade {
       );
       const balanceP = balances[assetP];
       const balanceR = balances[assetR];
-      const expectedAmount = calculateExpectedAmount(
-        balanceP,
-        balanceR,
-        amountP,
-        marketFound.fee
-      );
 
-      //TODO Here we need to take into account a little slippage so the check need to be a range between a min and max spread
-      if (expectedAmount !== amountR)
-        throw new Error('Not valid amount_r for the proposed amount_p');
+      if (tradeType === TradeProposeRequest.Type.BUY) {
+        const proposeAmount = calculateProposeAmount(
+          balanceP,
+          balanceR,
+          amountR,
+          marketFound.fee
+        );
+        // TODO check possible slippage due network congestion
+        if (proposeAmount !== amountP)
+          throw new Error('Not valid amount_p for the requested amount_r');
+      } else {
+        const expectedAmount = calculateExpectedAmount(
+          balanceP,
+          balanceR,
+          amountP,
+          marketFound.fee
+        );
+        //TODO Here we need to take into account a little slippage so the check need to be a range between a min and max spread
+        if (expectedAmount !== amountR)
+          throw new Error('Not valid amount_r for the proposed amount_p');
+      }
 
       // Let's stop the market to not process other concurrent swaps
       await marketModel.updateMarket({ quoteAsset }, { tradable: false });
