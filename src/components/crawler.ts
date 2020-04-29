@@ -1,18 +1,28 @@
 import { EventEmitter } from 'events';
 import { fetchUtxos, UtxoInterface, isValidNetwork } from '../utils';
 
+export enum CrawlerType {
+  DEPOSIT = 'DEPOSIT',
+  BALANCE = 'BALANCE',
+}
+
 export interface CrawlerInterface {
   running: boolean;
   storage: any;
   timer: any;
 
-  start(address: string): this;
-  stop(address: string): void;
+  start(type: string, address: string, interval?: number): this;
+  stop(type: string, address: string): void;
   stopAll(): void;
 
   on(
     event: 'crawler.deposit',
     listener: (address: string, pair: Array<UtxoInterface>) => void
+  ): this;
+
+  on(
+    event: 'crawler.balance',
+    listener: (address: string, utxos: Array<UtxoInterface>) => void
   ): this;
 }
 
@@ -21,7 +31,7 @@ export default class Crawler extends EventEmitter implements CrawlerInterface {
   storage: any;
   timer: any;
 
-  constructor(private network: string, private interval: number = 200) {
+  constructor(private network: string) {
     super();
 
     if (!isValidNetwork(this.network))
@@ -32,32 +42,46 @@ export default class Crawler extends EventEmitter implements CrawlerInterface {
     this.timer = {};
   }
 
-  start(address: string) {
+  start(type: string, address: string, interval = 200) {
     if (this.running) return this;
 
     this.running = true;
 
-    this.timer[address] = setInterval(
-      async () => await this.process(address),
-      this.interval
-    );
+    if (!this.timer.hasOwnProperty(type))
+      this.timer = { ...this.timer, [type]: {} };
+
+    //eslint-disable-next-line
+    let processorFunction = () => {};
+    if (type === CrawlerType.DEPOSIT)
+      processorFunction = async () => await this.processDeposit(address);
+    if (type === CrawlerType.BALANCE)
+      processorFunction = async () => await this.processBalance(address);
+
+    this.timer[type][address] = setInterval(processorFunction, interval);
 
     return this;
   }
 
-  stop(address: string): void {
+  stop(type: string, address: string): void {
     this.running = false;
-    clearInterval(this.timer[address]);
-    delete this.timer[address];
+    clearInterval(this.timer[type][address]);
+    delete this.timer[type][address];
   }
 
   stopAll(): void {
-    Object.keys(this.timer).forEach((key) => {
-      this.stop(key);
+    Object.keys(this.timer).forEach((type) => {
+      Object.keys(type).forEach((address) => {
+        this.stop(type, address);
+      });
     });
   }
 
-  private async process(address: string) {
+  private async processBalance(address: string) {
+    const fetchedUtxos = await fetchUtxos(address, this.network);
+    this.emit('crawler.balance', address, fetchedUtxos);
+  }
+
+  private async processDeposit(address: string) {
     const fetchedUtxos = await fetchUtxos(address, this.network);
 
     if (!this.storage.hasOwnProperty(address)) this.storage[address] = [];
@@ -79,7 +103,7 @@ export default class Crawler extends EventEmitter implements CrawlerInterface {
       if (first.asset !== second.asset) {
         this.storage[address].push(first, second);
         this.emit('crawler.deposit', address, [first, second]);
-        this.stop(address);
+        this.stop(CrawlerType.DEPOSIT, address);
       }
     }
   }

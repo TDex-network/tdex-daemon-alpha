@@ -5,6 +5,7 @@ export type UnspentSchema = {
   vout: number;
   asset: string;
   value: number;
+  address: string;
   spent: boolean;
 };
 
@@ -15,7 +16,7 @@ export default class Unspents {
   }
 
   getUnspents(
-    query: { spent?: boolean; asset?: string } = {}
+    query: { address?: string; spent?: boolean; asset?: string } = {}
   ): Promise<UnspentSchema[]> {
     return new Promise<UnspentSchema[]>((resolve, reject) => {
       this.storage.find(query, (err: any, docs: any[]) => {

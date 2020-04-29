@@ -1,5 +1,5 @@
 import Datastore from 'nedb';
-import { UtxoInterface } from 'tdex-sdk/dist/utils';
+import { UtxoInterface } from '../utils';
 import Markets from '../models/markets';
 import winston from 'winston';
 

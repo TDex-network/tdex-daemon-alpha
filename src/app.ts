@@ -7,7 +7,8 @@ import OperatorServer from './grpc/operatorServer';
 import Config, { ConfigInterface } from './config';
 import { initVault, VaultInterface } from './components/vault';
 import Market from './components/market';
-import Crawler, { CrawlerInterface } from './components/crawler';
+import Unspent from './components/unspent';
+import Crawler, { CrawlerInterface, CrawlerType } from './components/crawler';
 import { UtxoInterface } from './utils';
 
 class App {
@@ -42,7 +43,7 @@ class App {
         'crawler.deposit',
         async (walletAddress: string, pair: Array<UtxoInterface>) => {
           const { market, network } = this.config;
-          Market.fromFundingUtxos(
+          await Market.fromFundingUtxos(
             walletAddress,
             pair,
             this.datastore.markets,
@@ -51,6 +52,23 @@ class App {
               baseAsset: market.baseAsset[network],
               fee: market.fee,
             }
+          );
+          this.crawler.start(
+            CrawlerType.BALANCE,
+            walletAddress,
+            network === 'liquid' ? 60 * 1000 : 200
+          );
+        }
+      );
+
+      this.crawler.on(
+        'crawler.balance',
+        async (walletAddress: string, utxos: Array<UtxoInterface>) => {
+          await Unspent.fromUtxos(
+            walletAddress,
+            utxos,
+            this.datastore.unspents,
+            this.logger
           );
         }
       );

@@ -8,7 +8,7 @@ import {
 import Markets from '../models/markets';
 import { DBInterface } from '../db/datastore';
 import { VaultInterface } from '../components/vault';
-import { CrawlerInterface } from '../components/crawler';
+import { CrawlerInterface, CrawlerType } from '../components/crawler';
 
 class Operator {
   constructor(
@@ -38,7 +38,7 @@ class Operator {
         tradable: false,
       });
 
-      this.crawler.start(nextWallet.address);
+      this.crawler.start(CrawlerType.DEPOSIT, nextWallet.address);
 
       const reply = new DepositAddressReply();
       reply.setAddress(nextWallet.address);
