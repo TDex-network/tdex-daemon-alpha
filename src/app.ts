@@ -6,8 +6,8 @@ import TradeServer from './grpc/tradeServer';
 import OperatorServer from './grpc/operatorServer';
 import Config, { ConfigInterface } from './config';
 import { initVault, VaultInterface } from './components/vault';
+import Market from './components/market';
 import Crawler, { CrawlerInterface } from './components/crawler';
-import Markets, { schemaFromPair } from './models/markets';
 import { UtxoInterface } from './utils';
 
 class App {
@@ -42,27 +42,14 @@ class App {
         'crawler.deposit',
         async (walletAddress: string, pair: Array<UtxoInterface>) => {
           const { market, network } = this.config;
-          const model = new Markets(this.datastore.markets);
-
-          const baseAsset = market.baseAsset[network];
-          const { baseFundingTx, quoteFundingTx, quoteAsset } = schemaFromPair(
-            baseAsset,
-            pair
-          );
-
-          this.logger.info(
-            `New deposit for market ${quoteAsset} on address ${walletAddress}`
-          );
-
-          await model.updateMarketByWallet(
-            { walletAddress },
+          Market.fromFundingUtxos(
+            walletAddress,
+            pair,
+            this.datastore.markets,
+            this.logger,
             {
-              baseAsset,
-              quoteAsset,
-              baseFundingTx,
-              quoteFundingTx,
+              baseAsset: market.baseAsset[network],
               fee: market.fee,
-              tradable: true,
             }
           );
         }

@@ -1,5 +1,4 @@
 import Datastore from 'nedb';
-import { UtxoInterface } from '../utils';
 
 export type MarketSchema = {
   fee: number;
@@ -11,23 +10,6 @@ export type MarketSchema = {
   walletAddress: string;
   derivationIndex: number;
 };
-
-export function schemaFromPair(
-  baseAsset: string,
-  pair: Array<UtxoInterface>
-): any {
-  const [first, second] = pair;
-  const quoteAsset = first.asset !== baseAsset ? first.asset : second.asset;
-  const baseFundingTx = first.asset === baseAsset ? first.txid : second.txid;
-  const quoteFundingTx = first.asset !== baseAsset ? first.txid : second.txid;
-
-  return {
-    baseFundingTx,
-    quoteFundingTx,
-    baseAsset,
-    quoteAsset,
-  };
-}
 
 export default class Markets {
   storage: Datastore<any>;
