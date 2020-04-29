@@ -14,38 +14,48 @@ export interface UtxoInterface {
   script?: string;
 }
 
-export function isValidNetwork(n: string) {
-  const availableNetworks = Object.keys(EXPLORER_URL);
-  return availableNetworks.includes(n);
-}
-
-const isValidUrl = (s: string) => {
+export function isValidUrl(s: string): boolean {
   try {
     new URL(s);
     return true;
   } catch (err) {
     return false;
   }
-};
-
-function urlFromNetwork(n: string): string {
-  const { EXPLORER } = process.env;
-  if (EXPLORER)
-    if (isValidUrl(EXPLORER)) return EXPLORER;
-    else throw new Error('Not a valid explorer URL');
-
-  if (!isValidNetwork(n))
-    throw new Error('Network not support by the explorer');
-
-  return (EXPLORER_URL as any)[n];
 }
 
-export async function fetchUtxos(
+export function groupByAsset(data: any[]): any {
+  return data.reduce(
+    (
+      storage: { [x: string]: { [x: string]: any[] } },
+      item: { [x: string]: any; value: any }
+    ) => {
+      // get the first instance of the key by which we're grouping
+      const group = item['asset'];
+
+      // set `storage` for this instance of group to the outer scope (if not empty) or initialize it
+      if (storage.hasOwnProperty(group)) {
+        storage[group]['balance'] = storage[group]['balance'];
+        storage[group]['utxos'] = storage[group]['utxos'];
+      } else {
+        storage = { ...storage, [group]: { balance: 0, utxos: [] } };
+      }
+
+      // add this item to its group within `storage`
+      storage[group]['balance'] += item.value;
+      storage[group]['utxos'].push(item);
+
+      // return the updated storage to the reduce function, which will then loop through the next
+      return storage;
+    },
+    {}
+  );
+}
+
+export async function fetchUtxosWithUrl(
   address: string,
-  network: string,
+  url: string,
   asset?: string
 ): Promise<Array<UtxoInterface>> {
-  const url = urlFromNetwork(network);
   const allUtxos = (await axios.get(`${url}/address/${address}/utxo`)).data;
   if (!asset) return allUtxos;
 
@@ -54,53 +64,7 @@ export async function fetchUtxos(
   });
 }
 
-export async function fetchBalances(
-  address: string,
-  network: string
-): Promise<any> {
-  const fetchedData = await fetchUtxos(address, network);
-  const balances = fetchedData.reduce(
-    (storage: { [x: string]: any }, item: { [x: string]: any; value: any }) => {
-      // get the first instance of the key by which we're grouping
-      const group = item['asset'];
-
-      // set `storage` for this instance of group to the outer scope (if not empty) or initialize it
-      storage[group] = storage[group] || 0;
-
-      // add this item to its group within `storage`
-      storage[group] += item.value;
-
-      // return the updated storage to the reduce function, which will then loop through the next
-      return storage;
-    },
-    {}
-  ); // {} is the initial value of the storage
-
-  const utxos = fetchedData.reduce(
-    (storage: { [x: string]: any }, item: { [x: string]: any; value: any }) => {
-      // get the first instance of the key by which we're grouping
-      const group = item['asset'];
-
-      // set `storage` for this instance of group to the outer scope (if not empty) or initialize it
-      storage[group] = storage[group] || [];
-
-      // add this item to its group within `storage`
-      storage[group].push(item);
-
-      // return the updated storage to the reduce function, which will then loop through the next
-      return storage;
-    },
-    {}
-  ); // {} is the initial value of the storage
-
-  return {
-    balances,
-    utxos,
-  };
-}
-
-export async function pushTx(hex: string, network: string): Promise<any> {
-  const url = urlFromNetwork(network);
+export async function pushTx(hex: string, url: string): Promise<any> {
   let result;
   try {
     result = await axios.post(`${url}/tx`, hex, {

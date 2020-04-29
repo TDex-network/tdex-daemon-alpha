@@ -7,6 +7,7 @@ export type UnspentSchema = {
   value: number;
   address: string;
   spent: boolean;
+  spentBy?: string;
 };
 
 export default class Unspents {
@@ -63,6 +64,25 @@ export default class Unspents {
         (err: any, numReplaced: any) => {
           if (err || Number(numReplaced) !== 1)
             reject(err || new Error('Update error'));
+          else resolve();
+        }
+      );
+    });
+  }
+
+  updateUnspents(
+    query: {
+      spentBy: string;
+    },
+    updateQuery: any
+  ): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      this.storage.update(
+        query,
+        { $set: updateQuery },
+        { multi: true },
+        (err: any) => {
+          if (err) reject(err);
           else resolve();
         }
       );

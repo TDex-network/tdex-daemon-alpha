@@ -4,6 +4,22 @@ import Markets from '../models/markets';
 import winston from 'winston';
 
 export default class Market {
+  static async getWallets(
+    datastore: Datastore,
+    logger: winston.Logger
+  ): Promise<Array<string>> {
+    const wallets: string[] | PromiseLike<string[]> = [];
+    try {
+      const model = new Markets(datastore);
+      const markets = await model.getMarkets();
+      const wallets = markets.map((m) => m.walletAddress);
+      return wallets;
+    } catch (ignore) {
+      logger.error(`Cannot fetch markets from datastore`);
+      return wallets;
+    }
+  }
+
   static async fromFundingUtxos(
     walletAddress: string,
     fundingUtxos: Array<UtxoInterface>,

@@ -12,11 +12,17 @@ export default class TradeServer {
     private datastore: DBInterface,
     private vault: VaultInterface,
     private network: string,
+    private explorer: string,
     private logger: Logger
   ) {
     this.server = new Server();
 
-    const service = new Trade(this.datastore, this.vault, this.network);
+    const service = new Trade(
+      this.datastore,
+      this.vault,
+      this.network,
+      this.explorer
+    );
     this.server.addService(TradeService, service as any);
   }
 

@@ -24,7 +24,10 @@ class App {
     this.logger = createLogger();
     this.config = Config();
     this.datastore = new DB(this.config.datadir);
-    this.crawler = new Crawler(this.config.network);
+    this.crawler = new Crawler(
+      this.config.network,
+      this.config.explorer[this.config.network]
+    );
 
     process.on('SIGINT', async () => {
       await this.shutdown();
@@ -53,11 +56,6 @@ class App {
               fee: market.fee,
             }
           );
-          this.crawler.start(
-            CrawlerType.BALANCE,
-            walletAddress,
-            network === 'liquid' ? 60 * 1000 : 200
-          );
         }
       );
 
@@ -73,6 +71,20 @@ class App {
         }
       );
 
+      const walletOfMarkets = await Market.getWallets(
+        this.datastore.markets,
+        this.logger
+      );
+      const walletOfFeeAccount = this.vault.derive(
+        0,
+        this.config.network,
+        true
+      );
+      this.crawler.startAll(
+        CrawlerType.BALANCE,
+        walletOfMarkets.concat(walletOfFeeAccount.address)
+      );
+
       this.operatorGrpc = new OperatorServer(
         this.datastore,
         this.vault,
@@ -84,6 +96,7 @@ class App {
         this.datastore,
         this.vault,
         this.config.network,
+        this.config.explorer[this.config.network],
         this.logger
       );
       const { grpcTrader, grpcOperator } = this.config;

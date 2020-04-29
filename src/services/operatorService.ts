@@ -62,6 +62,8 @@ class Operator {
         isFeeAccount
       );
 
+      this.crawler.start(CrawlerType.BALANCE, feeWallet.address);
+
       const reply = new FeeDepositAddressReply();
       reply.setAddress(feeWallet.address);
       callback(null, reply);
