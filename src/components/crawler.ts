@@ -1,64 +1,90 @@
 import { EventEmitter } from 'events';
-import { fetchUtxos, UtxoInterface, isValidNetwork } from '../utils';
+import { fetchUtxosWithUrl, UtxoInterface } from '../utils';
+
+export enum CrawlerType {
+  DEPOSIT = 'DEPOSIT',
+  BALANCE = 'BALANCE',
+}
 
 export interface CrawlerInterface {
-  running: boolean;
+  interval: number;
   storage: any;
   timer: any;
 
-  start(address: string): this;
-  stop(address: string): void;
+  start(type: string, address: string, interval?: number): this;
+  startAll(type: string, addresses: Array<string>, interval?: number): void;
+  stop(type: string, address: string): void;
   stopAll(): void;
 
   on(
     event: 'crawler.deposit',
     listener: (address: string, pair: Array<UtxoInterface>) => void
   ): this;
+
+  on(
+    event: 'crawler.balance',
+    listener: (address: string, utxos: Array<UtxoInterface>) => void
+  ): this;
 }
 
 export default class Crawler extends EventEmitter implements CrawlerInterface {
-  running: boolean;
+  interval: number;
   storage: any;
   timer: any;
 
-  constructor(private network: string, private interval: number = 200) {
+  constructor(private network: string, private explorer: string) {
     super();
 
-    if (!isValidNetwork(this.network))
-      throw new Error('Network not support by the explorer');
-
-    this.running = false;
+    this.interval = this.network === 'liquid' ? 60 * 1000 : 200;
     this.storage = {};
     this.timer = {};
   }
 
-  start(address: string) {
-    if (this.running) return this;
+  start(type: string, address: string, interval: number = this.interval) {
+    // It's the first time we run the crawler
+    if (!this.timer.hasOwnProperty(type))
+      this.timer = { ...this.timer, [type]: {} };
 
-    this.running = true;
+    // We have already a crwaler running for this address
+    if (this.timer[type].hasOwnProperty(address)) return this;
 
-    this.timer[address] = setInterval(
-      async () => await this.process(address),
-      this.interval
-    );
+    //eslint-disable-next-line
+    let processorFunction = () => { };
+    if (type === CrawlerType.DEPOSIT)
+      processorFunction = async () => await this.processDeposit(address);
+    if (type === CrawlerType.BALANCE)
+      processorFunction = async () => await this.processBalance(address);
+
+    this.timer[type][address] = setInterval(processorFunction, interval);
 
     return this;
   }
 
-  stop(address: string): void {
-    this.running = false;
-    clearInterval(this.timer[address]);
-    delete this.timer[address];
+  stop(type: string, address: string): void {
+    clearInterval(this.timer[type][address]);
+    delete this.timer[type][address];
+  }
+
+  startAll(type: string, addresses: Array<string>, interval?: number): void {
+    addresses.forEach((a) => this.start(type, a, interval));
   }
 
   stopAll(): void {
-    Object.keys(this.timer).forEach((key) => {
-      this.stop(key);
+    Object.keys(this.timer[CrawlerType.DEPOSIT]).forEach((address) => {
+      this.stop(CrawlerType.DEPOSIT, address);
+    });
+    Object.keys(this.timer[CrawlerType.BALANCE]).forEach((address) => {
+      this.stop(CrawlerType.BALANCE, address);
     });
   }
 
-  private async process(address: string) {
-    const fetchedUtxos = await fetchUtxos(address, this.network);
+  private async processBalance(address: string) {
+    const fetchedUtxos = await fetchUtxosWithUrl(address, this.explorer);
+    this.emit('crawler.balance', address, fetchedUtxos);
+  }
+
+  private async processDeposit(address: string) {
+    const fetchedUtxos = await fetchUtxosWithUrl(address, this.explorer);
 
     if (!this.storage.hasOwnProperty(address)) this.storage[address] = [];
 
@@ -79,7 +105,8 @@ export default class Crawler extends EventEmitter implements CrawlerInterface {
       if (first.asset !== second.asset) {
         this.storage[address].push(first, second);
         this.emit('crawler.deposit', address, [first, second]);
-        this.stop(address);
+        this.stop(CrawlerType.DEPOSIT, address);
+        this.start(CrawlerType.BALANCE, address);
       }
     }
   }

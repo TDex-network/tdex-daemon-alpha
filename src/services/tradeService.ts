@@ -6,7 +6,7 @@ import {
 } from 'tdex-sdk';
 
 import {
-  Balance,
+  Balance as ProtoBalance,
   BalancesReply,
   BalancesRequest,
   TradeCompleteRequest,
@@ -22,17 +22,20 @@ import { TradeService } from 'tdex-protobuf/js/trade_grpc_pb';
 
 import Markets from '../models/markets';
 import { DBInterface } from '../db/datastore';
-import { fetchBalances, fetchUtxos, pushTx } from '../utils';
+import { pushTx } from '../utils';
 import { VaultInterface } from '../components/vault';
 import { networks } from 'liquidjs-lib';
 import Swaps from '../models/swaps';
 import Wallet from '../components/wallet';
+import Balance from '../components/balance';
+import Unspent from '../components/unspent';
 
 class Trade {
   constructor(
     private datastore: DBInterface,
     private vault: VaultInterface,
-    private network: string
+    private network: string,
+    private explorer: string
   ) {}
 
   async markets(
@@ -73,6 +76,7 @@ class Trade {
         };
 
       const reply = new BalancesReply();
+      const baseAsset = market!.getBaseAsset();
       const quoteAsset = market!.getQuoteAsset();
       const marketFound = await model.getMarket({ quoteAsset });
       if (!marketFound)
@@ -90,16 +94,20 @@ class Trade {
         };
 
       reply.setFee(marketFound.fee);
-      const { balances } = await fetchBalances(
-        marketFound.walletAddress,
-        this.network
-      );
-      Object.entries(balances).forEach(([asset, amount]: [string, any]) => {
-        const balance = new Balance();
-        balance.setAsset(asset);
-        balance.setAmount(Number(amount));
-        reply.addBalances(balance);
+      const balance = new Balance(this.datastore.unspents, this.explorer);
+      const balances = await balance.fromMarket(marketFound.walletAddress, {
+        baseAsset,
+        quoteAsset,
       });
+
+      const baseBalance = new ProtoBalance();
+      const quoteBalance = new ProtoBalance();
+      baseBalance.setAsset(baseAsset);
+      baseBalance.setAmount(balances[baseAsset].balance);
+      quoteBalance.setAsset(quoteAsset);
+      quoteBalance.setAmount(balances[quoteAsset].balance);
+      reply.addBalances(baseBalance);
+      reply.addBalances(quoteBalance);
 
       return callback(null, reply);
     } catch (e) {
@@ -140,18 +148,26 @@ class Trade {
           message: 'Market is currently unavailable. Retry',
         };
 
+      const baseAsset = market!.getBaseAsset();
       const assetP = swapRequestMessage!.getAssetP();
       const assetR = swapRequestMessage!.getAssetR();
       const amountP = swapRequestMessage!.getAmountP();
       const amountR = swapRequestMessage!.getAmountR();
       const transaction = swapRequestMessage!.getTransaction();
 
-      const { balances, utxos } = await fetchBalances(
+      const marketBalance = new Balance(this.datastore.unspents, this.explorer);
+      const marketBalances = await marketBalance.fromMarket(
         marketFound.walletAddress,
-        this.network
+        {
+          baseAsset,
+          quoteAsset,
+        }
       );
-      const balanceP = balances[assetP];
-      const balanceR = balances[assetR];
+
+      const balanceP = marketBalances[assetP].balance;
+      const balanceR = marketBalances[assetR].balance;
+
+      const marketUtxos = marketBalances[assetR].utxos;
 
       if (tradeType === TradeProposeRequest.Type.BUY) {
         const proposeAmount = calculateProposeAmount(
@@ -183,7 +199,7 @@ class Trade {
       // add swap input and outputs
       const unsignedPsbt: string = wallet.updateTx(
         transaction,
-        utxos[assetR],
+        marketUtxos,
         amountR,
         amountP,
         assetR,
@@ -194,11 +210,10 @@ class Trade {
       const feeWallet = this.vault.derive(0, this.network, true);
       // Liquid Bitcoin asset hash
       const bitcoinAssetHash = (networks as any)[this.network].assetHash;
-      const feeUtxos = await fetchUtxos(
-        feeWallet.address,
-        this.network,
-        bitcoinAssetHash
-      );
+      const feeBalance = new Balance(this.datastore.unspents, this.explorer);
+      const feeUtxos = (
+        await feeBalance.fromAsset(feeWallet.address, bitcoinAssetHash)
+      )[bitcoinAssetHash].utxos;
 
       const psbtWithFeesUnsigned: string = feeWallet.payFees(
         unsignedPsbt,
@@ -227,14 +242,28 @@ class Trade {
 
       const reply = new TradeProposeReply();
       reply.setSwapAccept(swapAcceptMessage);
+
+      const feeOutpoints = (feeUtxos as any).map(({ txid, vout }: any) => ({
+        txid,
+        vout,
+      }));
+      const marketOutpoints = (marketUtxos as any).map(
+        ({ txid, vout }: any) => ({ txid, vout })
+      );
+      await Unspent.lock(feeOutpoints, swapAcceptId, this.datastore.unspents);
+      await Unspent.lock(
+        marketOutpoints,
+        swapAcceptId,
+        this.datastore.unspents
+      );
+
       call.write(reply);
       call.end();
     } catch (e) {
-      console.error(e);
-
       if (quoteAsset)
         await marketModel.updateMarket({ quoteAsset }, { tradable: true });
 
+      console.error(e);
       call.emit('error', e);
       call.write(e);
       call.end();
@@ -246,9 +275,9 @@ class Trade {
   ): Promise<void> {
     const marketModel = new Markets(this.datastore.markets);
     const swapModel = new Swaps(this.datastore.swaps);
+    const swapComplete = call.request.getSwapComplete();
+    const swapAcceptId = swapComplete!.getAcceptId();
     try {
-      const swapComplete = call.request.getSwapComplete();
-      const swapAcceptId = swapComplete!.getAcceptId();
       if (!swapComplete || !swapAcceptId)
         throw {
           code: grpc.status.INVALID_ARGUMENT,
@@ -266,7 +295,7 @@ class Trade {
 
       const transaction = swapComplete.getTransaction();
       const hex = Wallet.toHex(transaction);
-      const txid = await pushTx(hex, this.network);
+      const txid = await pushTx(hex, this.explorer);
 
       await marketModel.updateMarket(
         { quoteAsset: swapFound.quoteAsset },
@@ -279,6 +308,7 @@ class Trade {
       call.write(reply);
       call.end();
     } catch (e) {
+      await Unspent.unlock(swapAcceptId, this.datastore.unspents);
       console.error(e);
       call.emit('error', e);
       call.write(e);

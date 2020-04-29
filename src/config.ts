@@ -5,6 +5,7 @@ import * as path from 'path';
 export interface ConfigInterface {
   datadir: string;
   network: string;
+  explorer: any;
   grpcOperator: any;
   grpcTrader: any;
   market: any;
@@ -14,6 +15,10 @@ export interface ConfigInterface {
 function defaultConfig(): any {
   return {
     network: 'regtest',
+    explorer: {
+      liquid: 'https://blockstream.info/liquid/api',
+      regtest: 'https://nigiri.network/liquid/api',
+    },
     grpcOperator: {
       host: '0.0.0.0',
       port: '9000',

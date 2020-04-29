@@ -1,7 +1,6 @@
 dist
 .DS_Store
 /test/datadir/db
-/test/datadir/config.json
 # Logs
 logs
 *.log

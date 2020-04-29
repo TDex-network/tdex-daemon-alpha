@@ -1,0 +1,26 @@
+{
+  "network": "regtest",
+  "explorer": {
+    "liquid": "https://blockstream.info/liquid/api",
+    "regtest": "http://localhost:3001"
+  },
+  "grpcOperator": {
+    "host": "0.0.0.0",
+    "port": "9000"
+  },
+  "grpcTrader": {
+    "host": "0.0.0.0",
+    "port": "9945"
+  },
+  "market": {
+    "fee": 0.25,
+    "baseAsset": {
+      "liquid": "6f0279e9ed041c3d710a9f57d0c02928416460c4b722ae3457a11eec381c526d",
+      "regtest": "5ac9f65c0efcc4775e0baec4ec03abdde22473cd3cf33c0419ca290e0751b225"
+    }
+  },
+  "tickers": {
+    "6f0279e9ed041c3d710a9f57d0c02928416460c4b722ae3457a11eec381c526d": "L-BTC",
+    "5ac9f65c0efcc4775e0baec4ec03abdde22473cd3cf33c0419ca290e0751b225": "L-BTC"
+  }
+}

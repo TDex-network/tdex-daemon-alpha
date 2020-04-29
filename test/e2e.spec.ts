@@ -22,7 +22,7 @@ describe('End to end testing', () => {
   beforeAll(async () => {
     try {
       await app.start();
-      await sleep(1000);
+      await sleep(500);
     } catch (err) {
       app.logger.error(err.message);
     }
@@ -128,6 +128,7 @@ describe('End to end testing', () => {
      * Now let's try to BUY
      */
 
+    await sleep(1000);
     const balancesAndFee2 = await balances({ baseAsset, quoteAsset });
     const amountToReceive2 = 5000;
     const amountToBeSent2 = calculateProposeAmount(
@@ -196,8 +197,9 @@ describe('End to end testing', () => {
   });
 
   afterAll(async () => {
-    app.datastore.close();
     await app.crawler.stopAll();
+    await sleep(500);
+    app.datastore.close();
     await app.operatorGrpc.close();
     await app.tradeGrpc.close();
   });
