@@ -195,14 +195,13 @@ class Trade {
 
       // Let's stop all markets to not process other concurrent swaps
       markets = await marketModel.getMarkets({ tradable: true });
-      Promise.all(
-        markets.map(async (market: { quoteAsset: string }) => {
-          await marketModel.updateMarket(
-            { quoteAsset: market.quoteAsset },
-            { tradable: false }
-          );
-        })
+      const promises = markets.map((market: { quoteAsset: string }) =>
+        marketModel.updateMarket(
+          { quoteAsset: market.quoteAsset },
+          { tradable: false }
+        )
       );
+      await Promise.all(promises);
 
       const derivationIndex = marketFound.derivationIndex;
       const wallet = this.vault.derive(derivationIndex, this.network);
@@ -267,15 +266,15 @@ class Trade {
       call.write(reply);
       call.end();
     } catch (e) {
-      if (markets)
-        Promise.all(
-          markets.map(async (market: { quoteAsset: string }) => {
-            await marketModel.updateMarket(
-              { quoteAsset: market.quoteAsset },
-              { tradable: true }
-            );
-          })
+      if (markets) {
+        const promises = markets.map((market: { quoteAsset: string }) =>
+          marketModel.updateMarket(
+            { quoteAsset: market.quoteAsset },
+            { tradable: true }
+          )
         );
+        await Promise.all(promises);
+      }
 
       console.error(e);
       call.emit('error', e);
