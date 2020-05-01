@@ -76,7 +76,8 @@ class App {
               const { explorer, market, network } = this.config;
               const balance = new Balance(
                 this.datastore.unspents,
-                explorer[network]
+                explorer[network],
+                this.logger
               );
 
               const lbtc = market.baseAsset[network];

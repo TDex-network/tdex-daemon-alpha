@@ -97,7 +97,11 @@ class Trade {
         };
 
       reply.setFee(marketFound.fee);
-      const balance = new Balance(this.datastore.unspents, this.explorer);
+      const balance = new Balance(
+        this.datastore.unspents,
+        this.explorer,
+        this.logger
+      );
       const balances = await balance.fromMarket(marketFound.walletAddress, {
         baseAsset,
         quoteAsset,
@@ -159,7 +163,11 @@ class Trade {
       const amountR = swapRequestMessage!.getAmountR();
       const transaction = swapRequestMessage!.getTransaction();
 
-      const marketBalance = new Balance(this.datastore.unspents, this.explorer);
+      const marketBalance = new Balance(
+        this.datastore.unspents,
+        this.explorer,
+        this.logger
+      );
       const marketBalances = await marketBalance.fromMarket(
         marketFound.walletAddress,
         {
@@ -218,7 +226,11 @@ class Trade {
       const feeWallet = this.vault.derive(0, this.network, true);
       // Liquid Bitcoin asset hash
       const bitcoinAssetHash = (networks as any)[this.network].assetHash;
-      const feeBalance = new Balance(this.datastore.unspents, this.explorer);
+      const feeBalance = new Balance(
+        this.datastore.unspents,
+        this.explorer,
+        this.logger
+      );
       const feeUtxos = (
         await feeBalance.fromAsset(feeWallet.address, bitcoinAssetHash)
       )[bitcoinAssetHash].utxos;

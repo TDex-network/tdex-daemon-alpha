@@ -24,7 +24,8 @@ export default class OperatorServer {
       this.vault,
       this.crawler,
       this.network,
-      this.explorer
+      this.explorer,
+      this.logger
     );
     this.server.addService(OperatorService, this.operatorService as any);
   }

@@ -1,5 +1,6 @@
 import grpc from 'grpc';
 import { networks } from 'liquidjs-lib';
+import { Logger } from 'winston';
 
 import { OperatorService } from '../proto/operator_grpc_pb';
 import {
@@ -20,7 +21,8 @@ class Operator {
     private vault: VaultInterface,
     private crawler: CrawlerInterface,
     private network: string,
-    private explorer: string
+    private explorer: string,
+    private logger: Logger
   ) {}
 
   async depositAddress(
@@ -107,7 +109,7 @@ class Operator {
       isFeeAccount
     );
 
-    const b = new Balance(this.datastore.unspents, this.explorer);
+    const b = new Balance(this.datastore.unspents, this.explorer, this.logger);
     const bitcoinAssetHash = (networks as any)[this.network].assetHash;
     const feeAccountBalance = (
       await b.fromAsset(feeWallet.address, bitcoinAssetHash)
