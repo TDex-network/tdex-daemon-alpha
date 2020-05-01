@@ -2,7 +2,7 @@
 Alpha Daemon implementation to execute automated market marking strategies on top of TDEX
 
 
-## Install
+## ⬇️ Install
 
 * Install with **npm**
 
@@ -17,7 +17,7 @@ $ npm install -g tdex-daemon
 Move into a folder in your PATH (eg. `/usr/bin` or `/usr/local/bin`)
 
 
-## Run
+## 🏃‍♀️ Run
 
 Once the daemon is launched it will create a data directory `~/.tdex-daemon` containing the default configuration file `config.json`.
 
@@ -32,7 +32,7 @@ $ tdex-daemon
 
 It will be created a wallet for the daemon and stored in the chosen data directory in a file `vault.json`.
 
-You can decide to encrypt it with a password and if you decide to do so the daemon will save it encrypted and shutdown the program. 
+You can decide to encrypt it with a password and if you decide to do so the daemon will save it encrypted and shutdown.
 
 Then start again exporting the environment variable `TDEX_PASSWORD` with the chosen password so the daemon could automatically process incoming swap requests. 
 > DO NOT FORGET THE PASSWORD, OR YOU WILL NOT BE ABLE TO RECOVER YOUR FUNDS
@@ -44,11 +44,9 @@ info: Trader gRPC server listening on 0.0.0.0:9945
 info: Operator gRPC server listening on 0.0.0.0:9000
 ```
 
-
-
 If running on a VPS or the cloud, open the ports for the two gRPC interfaces.
 
-## Deposit funds
+## 💰 Deposit funds
 
 To start a market you need to deposit two reserves for the pair you are providing liquidity for. The initial ratio of two amounts you deposit will represent the starting price you give to that pair. 
 
@@ -84,7 +82,7 @@ $ tdex-cli operator deposit
 
 Below is a list of commands you will probably find useful.
 
-### yarn start
+### `yarn start`
 
 Runs the project without compiling TypeScript code into plain javascript.
 
