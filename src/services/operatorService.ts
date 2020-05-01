@@ -31,7 +31,7 @@ class Operator {
     try {
       if (!this.depositsEnabled) {
         throw {
-          code: grpc.status.UNIMPLEMENTED,
+          code: grpc.status.UNAVAILABLE,
           name: 'NOT_ENABLED',
           message: 'Deposits are temporary disabled',
         };
