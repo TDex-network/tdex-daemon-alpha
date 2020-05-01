@@ -4,6 +4,7 @@ import {
   calculateExpectedAmount,
   calculateProposeAmount,
 } from 'tdex-sdk';
+import { Logger } from 'winston';
 
 import {
   Balance as ProtoBalance,
@@ -13,7 +14,7 @@ import {
   TradeCompleteReply,
   MarketsReply,
   MarketWithFee,
-  Market,
+  Market as ProtoMarket,
   TradeProposeRequest,
   TradeProposeReply,
 } from 'tdex-protobuf/js/trade_pb';
@@ -29,13 +30,15 @@ import Swaps from '../models/swaps';
 import Wallet from '../components/wallet';
 import Balance from '../components/balance';
 import Unspent from '../components/unspent';
+import Market from '../components/market';
 
 class Trade {
   constructor(
     private datastore: DBInterface,
     private vault: VaultInterface,
     private network: string,
-    private explorer: string
+    private explorer: string,
+    private logger: Logger
   ) {}
 
   async markets(
@@ -48,7 +51,7 @@ class Trade {
       const markets = await model.getMarkets({ tradable: true });
       markets.forEach((m: any) => {
         const marketWithfee = new MarketWithFee();
-        const market = new Market();
+        const market = new ProtoMarket();
         market.setBaseAsset(m.baseAsset);
         market.setQuoteAsset(m.quoteAsset);
         marketWithfee.setMarket(market);
@@ -121,7 +124,6 @@ class Trade {
     const marketModel = new Markets(this.datastore.markets);
     const swapModel = new Swaps(this.datastore.swaps);
     let quoteAsset = undefined;
-    let markets = undefined;
 
     try {
       const market = call.request.getMarket();
@@ -194,14 +196,11 @@ class Trade {
       }
 
       // Let's stop all markets to not process other concurrent swaps
-      markets = await marketModel.getMarkets({ tradable: true });
-      const promises = markets.map((market: { quoteAsset: string }) =>
-        marketModel.updateMarket(
-          { quoteAsset: market.quoteAsset },
-          { tradable: false }
-        )
+      await Market.updateAllTradableStatus(
+        false,
+        this.datastore.markets,
+        this.logger
       );
-      await Promise.all(promises);
 
       const derivationIndex = marketFound.derivationIndex;
       const wallet = this.vault.derive(derivationIndex, this.network);
@@ -266,15 +265,11 @@ class Trade {
       call.write(reply);
       call.end();
     } catch (e) {
-      if (markets) {
-        const promises = markets.map((market: { quoteAsset: string }) =>
-          marketModel.updateMarket(
-            { quoteAsset: market.quoteAsset },
-            { tradable: true }
-          )
-        );
-        await Promise.all(promises);
-      }
+      await Market.updateAllTradableStatus(
+        true,
+        this.datastore.markets,
+        this.logger
+      );
 
       console.error(e);
       call.emit('error', e);
@@ -286,7 +281,6 @@ class Trade {
   async tradeComplete(
     call: grpc.ServerWritableStream<TradeCompleteRequest>
   ): Promise<void> {
-    const marketModel = new Markets(this.datastore.markets);
     const swapModel = new Swaps(this.datastore.swaps);
     const swapComplete = call.request.getSwapComplete();
     const swapAcceptId = swapComplete!.getAcceptId();
@@ -311,13 +305,11 @@ class Trade {
       const txid = await pushTx(hex, this.explorer);
 
       // Restart all previously stopped markets
-      const markets = await marketModel.getMarkets({ tradable: false });
-      markets.forEach(async (market: { quoteAsset: string }) => {
-        await marketModel.updateMarket(
-          { quoteAsset: market.quoteAsset },
-          { tradable: true }
-        );
-      });
+      await Market.updateAllTradableStatus(
+        true,
+        this.datastore.markets,
+        this.logger
+      );
       await swapModel.updateSwap({ swapAcceptId }, { completed: true, txid });
 
       const reply = new TradeCompleteReply();
