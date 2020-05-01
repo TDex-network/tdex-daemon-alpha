@@ -21,8 +21,6 @@ describe('End to end testing', () => {
   // Start the daemon
   beforeAll(async () => {
     try {
-      // give nigiri the time to startup
-      await sleep(4000);
       await app.start();
       await sleep(500);
     } catch (err) {
