@@ -1,5 +1,6 @@
 import grpc from 'grpc';
 import { networks } from 'liquidjs-lib';
+import { Logger } from 'winston';
 
 import { OperatorService } from '../proto/operator_grpc_pb';
 import {
@@ -12,16 +13,16 @@ import { DBInterface } from '../db/datastore';
 import { VaultInterface } from '../components/vault';
 import { CrawlerInterface, CrawlerType } from '../components/crawler';
 import Balance from '../components/balance';
+import { FEE_AMOUNT_LIMIT } from '../utils';
 
 class Operator {
-  depositsEnabled = true;
-
   constructor(
     private datastore: DBInterface,
     private vault: VaultInterface,
     private crawler: CrawlerInterface,
     private network: string,
-    private explorer: string
+    private explorer: string,
+    private logger: Logger
   ) {}
 
   async depositAddress(
@@ -29,7 +30,8 @@ class Operator {
     callback: grpc.sendUnaryData<DepositAddressReply>
   ): Promise<void> {
     try {
-      if (!this.depositsEnabled) {
+      const feeAccountBalance = await this.__feeBalance();
+      if (feeAccountBalance < FEE_AMOUNT_LIMIT) {
         throw {
           code: grpc.status.UNAVAILABLE,
           name: 'UNAVAILABLE',
@@ -89,26 +91,30 @@ class Operator {
     callback: grpc.sendUnaryData<FeeBalanceReply>
   ): Promise<void> {
     try {
-      const derivationIndex = 0;
-      const isFeeAccount = true;
-      const feeWallet = this.vault.derive(
-        derivationIndex,
-        this.network,
-        isFeeAccount
-      );
-
-      const b = new Balance(this.datastore.unspents, this.explorer);
-      const bitcoinAssetHash = (networks as any)[this.network].assetHash;
-      const feeAccountBalance = (
-        await b.fromAsset(feeWallet.address, bitcoinAssetHash)
-      )[bitcoinAssetHash].balance;
-
+      const feeAccountBalance = await this.__feeBalance();
       const reply = new FeeBalanceReply();
       reply.setBalance(feeAccountBalance);
       callback(null, reply);
     } catch (e) {
       return callback(e, null);
     }
+  }
+
+  private async __feeBalance(): Promise<number> {
+    const derivationIndex = 0;
+    const isFeeAccount = true;
+    const feeWallet = this.vault.derive(
+      derivationIndex,
+      this.network,
+      isFeeAccount
+    );
+
+    const b = new Balance(this.datastore.unspents, this.explorer, this.logger);
+    const bitcoinAssetHash = (networks as any)[this.network].assetHash;
+    const feeAccountBalance = (
+      await b.fromAsset(feeWallet.address, bitcoinAssetHash)
+    )[bitcoinAssetHash].balance;
+    return feeAccountBalance;
   }
 }
 
