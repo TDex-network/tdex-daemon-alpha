@@ -6,7 +6,7 @@ import {
   Transaction,
 } from 'liquidjs-lib';
 //Libs
-import { coinselect, calculateFees } from '../utils';
+import { coinselect, calculateFees, UtxoInterface } from '../utils';
 //Types
 import { ECPairInterface } from 'liquidjs-lib/types/ecpair';
 import { Network } from 'liquidjs-lib/types/networks';
@@ -25,11 +25,11 @@ export interface WalletInterface {
     outputAmount: number,
     inputAsset: string,
     outputAsset: string
-  ): { base64: string; selectedUtxos: any[] };
+  ): { base64: string; selectedUtxos: UtxoInterface[] };
   payFees(
     psbtBase64: string,
     utxos: Array<any>
-  ): { base64: string; selectedUtxos: any[] };
+  ): { base64: string; selectedUtxos: UtxoInterface[] };
   sign(psbtBase64: string): string;
 }
 
@@ -64,7 +64,7 @@ export default class Wallet implements WalletInterface {
     outputAmount: number,
     inputAsset: string,
     outputAsset: string
-  ): { base64: string; selectedUtxos: any[] } {
+  ): { base64: string; selectedUtxos: UtxoInterface[] } {
     if (inputs.length === 0) throw new Error('Swap: No utxos available');
 
     let psbt: Psbt;
@@ -123,7 +123,7 @@ export default class Wallet implements WalletInterface {
   payFees(
     psbtBase64: string,
     utxos: any[]
-  ): { base64: string; selectedUtxos: any[] } {
+  ): { base64: string; selectedUtxos: UtxoInterface[] } {
     if (utxos.length === 0) throw new Error('Fees: No utxos available');
 
     const psbt = Psbt.fromBase64(psbtBase64);
