@@ -1,5 +1,4 @@
 import winston from 'winston';
-import { networks } from 'liquidjs-lib';
 
 import DB from './db/datastore';
 import createLogger from './logger';
@@ -77,18 +76,14 @@ class App {
               this.logger
             );
 
-            const walletOfFeeAccount = this.vault.derive(
-              0,
-              this.config.network,
-              true
-            );
-
             if (walletAddress === walletOfFeeAccount.address) {
+              const { explorer, market, network } = this.config;
               const balance = new Balance(
                 this.datastore.unspents,
-                this.config.explorer[this.config.network]
+                explorer[network]
               );
-              const lbtc = (networks as any)[this.config.network].assetHash;
+
+              const lbtc = market.baseAsset[network];
               const lbtcBalance = (
                 await balance.fromAsset(walletAddress, lbtc)
               )[lbtc].balance;
