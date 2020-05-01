@@ -19,7 +19,7 @@ Move into a folder in your PATH (eg. `/usr/bin` or `/usr/local/bin`)
 
 ## Run
 
-Once the deamon is launched it will create a data directory `~/.tdex-daemon` containing a the default configuration file `config.json`.
+Once the daemon is launched it will create a data directory `~/.tdex-daemon` containing the default configuration file `config.json`.
 
 It's possible to use a different path for the data directory with the environment variable `TDEX_DAEMON_PATH`
 
@@ -54,7 +54,7 @@ To start a market you need to deposit two reserves for the pair you are providin
 
 From that point on the market making strategy will self regulate the trading price.
 
-You will also need to deposit in a different address an amount of LBTCs used by all markets to pay for transactions fees.
+You will also need to deposit in a different address an amount of LBTCs used by all markets to pay for transaction fees.
 
 1. Download and install the [`tdex-cli`](https://github.com/Sevenlab/tdex-cli) 
 2. Connect the CLI to the daemon with the gRPC **operator** interface. 
@@ -65,7 +65,7 @@ $ tdex-cli connect localhost:9000
 ```
 $ tdex-cli operator deposit --fee
 ```
-4. Get the deposit address and send L-BTC and other Liquid asset to create and start a `market`
+4. Get the deposit address and send L-BTC and other Liquid assets to create and start a `market`
 ```sh
 $ tdex-cli operator deposit
 ```
