@@ -9,13 +9,9 @@ import { initVault, VaultInterface } from './components/vault';
 import Market from './components/market';
 import Unspent from './components/unspent';
 import Crawler, { CrawlerInterface, CrawlerType } from './components/crawler';
-import { UtxoInterface } from './utils';
+import { UtxoInterface, FEE_AMOUNT_LIMIT } from './utils';
 import Balance from './components/balance';
-
-// Swaps have an average size of 850 bytes.
-// The lower bound of the fee account balance is set to
-// be able to top up fees for at least 5 swaps.
-const FEE_AMOUNT_LIMIT = 4500;
+import Swaps from './models/swaps';
 
 class App {
   logger: winston.Logger;
@@ -68,14 +64,14 @@ class App {
       this.crawler.on(
         'crawler.balance',
         async (walletAddress: string, utxos: Array<UtxoInterface>) => {
-          try {
-            await Unspent.fromUtxos(
-              walletAddress,
-              utxos,
-              this.datastore.unspents,
-              this.logger
-            );
+          await Unspent.fromUtxos(
+            walletAddress,
+            utxos,
+            this.datastore.unspents,
+            this.logger
+          );
 
+          try {
             if (walletAddress === walletOfFeeAccount.address) {
               const { explorer, market, network } = this.config;
               const balance = new Balance(
@@ -87,23 +83,42 @@ class App {
               const lbtcBalance = (
                 await balance.fromAsset(walletAddress, lbtc)
               )[lbtc].balance;
+              const allTradableMarkets = await Market.areAllTradable(
+                this.datastore.markets,
+                this.logger
+              );
+              const swapModel = new Swaps(this.datastore.swaps);
+              const pendingSwaps = (await swapModel.getSwaps).length > 0;
 
-              if (
-                (this.tradeGrpc.server as any).started &&
-                lbtcBalance < FEE_AMOUNT_LIMIT
-              ) {
-                await this.disableTradesAndDeposits();
+              if (allTradableMarkets && lbtcBalance < FEE_AMOUNT_LIMIT) {
+                this.logger.warn(
+                  'Fee account balance too low.\n' +
+                    'Trades and deposits will be disbaled.\n' +
+                    `You must send funds to the fee account address (${walletAddress}) in order to restore them.`
+                );
+                await Market.updateAllTradableStatus(
+                  false,
+                  this.datastore.markets,
+                  this.logger
+                );
               }
               if (
-                !(this.tradeGrpc.server as any).started &&
+                !allTradableMarkets &&
+                !pendingSwaps &&
                 lbtcBalance >= FEE_AMOUNT_LIMIT
               ) {
-                await this.enableTradesAndDeposits();
+                await Market.updateAllTradableStatus(
+                  true,
+                  this.datastore.markets,
+                  this.logger
+                );
               }
             }
           } catch (e) {
             console.error(e);
-            this.logger.error(e.Error());
+            this.logger.error(
+              `Error while checking balance for fee account: ${e}`
+            );
           }
         }
       );
@@ -155,29 +170,6 @@ class App {
     await this.operatorGrpc.close();
 
     process.exit(0);
-  }
-
-  async disableTradesAndDeposits(): Promise<void> {
-    this.logger.warn(
-      'Fee account balance too low.\n' +
-        'Shutting down trade server and disabling DepositAddress rpc.\n' +
-        'You must send funds to the fee account address in order to restore them.'
-    );
-    this.operatorGrpc.operatorService.depositsEnabled = false;
-    await this.tradeGrpc.close();
-  }
-
-  async enableTradesAndDeposits(): Promise<void> {
-    return new Promise((resolve) => {
-      this.logger.info(
-        'New funds detected for fee acccount.\n' +
-          'Restoring trade server and deposits.'
-      );
-      const { grpcTrader } = this.config;
-      this.tradeGrpc.listen(grpcTrader.host, grpcTrader.port);
-      this.operatorGrpc.operatorService.depositsEnabled = true;
-      resolve();
-    });
   }
 }
 
