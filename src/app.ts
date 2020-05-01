@@ -11,7 +11,7 @@ import Unspent from './components/unspent';
 import Crawler, { CrawlerInterface, CrawlerType } from './components/crawler';
 import { UtxoInterface, FEE_AMOUNT_LIMIT } from './utils';
 import Balance from './components/balance';
-import Swaps from './models/swaps';
+import Swap from './components/swap';
 
 class App {
   logger: winston.Logger;
@@ -88,8 +88,9 @@ class App {
                 this.datastore.markets,
                 this.logger
               );
-              const swapModel = new Swaps(this.datastore.swaps);
-              const pendingSwaps = (await swapModel.getSwaps).length > 0;
+              const pendingSwaps =
+                (await Swap.pendingSwaps(this.datastore.swaps, this.logger))
+                  .length > 0;
 
               if (allTradableMarkets && lbtcBalance < FEE_AMOUNT_LIMIT) {
                 this.logger.warn(
