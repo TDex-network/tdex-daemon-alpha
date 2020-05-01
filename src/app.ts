@@ -88,9 +88,10 @@ class App {
                 this.datastore.markets,
                 this.logger
               );
-              const pendingSwaps =
-                (await Swap.pendingSwaps(this.datastore.swaps, this.logger))
-                  .length > 0;
+              const pendingSwaps = await Swap.anyPending(
+                this.datastore.swaps,
+                this.logger
+              );
 
               if (allTradableMarkets && lbtcBalance < FEE_AMOUNT_LIMIT) {
                 this.logger.warn(

@@ -1,19 +1,19 @@
 import Datastore from 'nedb';
-import Swaps, { SwapSchema } from '../models/swaps';
+import Swaps from '../models/swaps';
 import winston from 'winston';
 
 export default class Swap {
-  static async pendingSwaps(
+  static async anyPending(
     datastore: Datastore,
     logger: winston.Logger
-  ): Promise<SwapSchema[]> {
+  ): Promise<boolean> {
     try {
       const model = new Swaps(datastore);
       const swaps = await model.getSwaps({ complete: false });
-      return swaps;
+      return swaps.length > 0;
     } catch (ignore) {
       logger.error(`Cannot fetch swaps from datastore`);
-      return [];
+      return false;
     }
   }
 }
