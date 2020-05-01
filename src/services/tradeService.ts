@@ -121,6 +121,8 @@ class Trade {
     const marketModel = new Markets(this.datastore.markets);
     const swapModel = new Swaps(this.datastore.swaps);
     let quoteAsset = undefined;
+    let markets = undefined;
+
     try {
       const market = call.request.getMarket();
       const tradeType = call.request.getType();
@@ -191,13 +193,19 @@ class Trade {
           throw new Error('Not valid amount_r for the proposed amount_p');
       }
 
-      // Let's stop the market to not process other concurrent swaps
-      await marketModel.updateMarket({ quoteAsset }, { tradable: false });
+      // Let's stop all markets to not process other concurrent swaps
+      markets = await marketModel.getMarkets({ tradable: true });
+      markets.forEach(async (market: { quoteAsset: string }) => {
+        await marketModel.updateMarket(
+          { quoteAsset: market.quoteAsset },
+          { tradable: false }
+        );
+      });
 
       const derivationIndex = marketFound.derivationIndex;
       const wallet = this.vault.derive(derivationIndex, this.network);
       // add swap input and outputs
-      const unsignedPsbt: string = wallet.updateTx(
+      const unsignedPsbt: any = wallet.updateTx(
         transaction,
         marketUtxos,
         amountR,
@@ -215,18 +223,18 @@ class Trade {
         await feeBalance.fromAsset(feeWallet.address, bitcoinAssetHash)
       )[bitcoinAssetHash].utxos;
 
-      const psbtWithFeesUnsigned: string = feeWallet.payFees(
-        unsignedPsbt,
+      const unsignedPsbtWithFees: any = feeWallet.payFees(
+        unsignedPsbt.base64,
         feeUtxos
       );
 
-      const psbtWithFees = feeWallet.sign(psbtWithFeesUnsigned);
-      const psbtBase64: string = wallet.sign(psbtWithFees);
+      const signedPsbtWithFees = feeWallet.sign(unsignedPsbtWithFees.base64);
+      const signedPsbt: string = wallet.sign(signedPsbtWithFees);
 
       const swap = new Swap({ chain: this.network });
       const swapAcceptMessageSerialized = swap.accept({
         message: swapRequestMessage.serializeBinary(),
-        psbtBase64: psbtBase64,
+        psbtBase64: signedPsbt,
       });
       const swapAcceptMessage = SwapAccept.deserializeBinary(
         swapAcceptMessageSerialized
@@ -243,16 +251,13 @@ class Trade {
       const reply = new TradeProposeReply();
       reply.setSwapAccept(swapAcceptMessage);
 
-      const feeOutpoints = (feeUtxos as any).map(({ txid, vout }: any) => ({
-        txid,
-        vout,
-      }));
-      const marketOutpoints = (marketUtxos as any).map(
-        ({ txid, vout }: any) => ({ txid, vout })
-      );
-      await Unspent.lock(feeOutpoints, swapAcceptId, this.datastore.unspents);
       await Unspent.lock(
-        marketOutpoints,
+        unsignedPsbt.selectedUtxos,
+        swapAcceptId,
+        this.datastore.unspents
+      );
+      await Unspent.lock(
+        unsignedPsbtWithFees.selectedUtxos,
         swapAcceptId,
         this.datastore.unspents
       );
@@ -260,8 +265,13 @@ class Trade {
       call.write(reply);
       call.end();
     } catch (e) {
-      if (quoteAsset)
-        await marketModel.updateMarket({ quoteAsset }, { tradable: true });
+      if (markets)
+        markets.forEach(async (market: { quoteAsset: string }) => {
+          await marketModel.updateMarket(
+            { quoteAsset: market.quoteAsset },
+            { tradable: true }
+          );
+        });
 
       console.error(e);
       call.emit('error', e);
@@ -297,10 +307,14 @@ class Trade {
       const hex = Wallet.toHex(transaction);
       const txid = await pushTx(hex, this.explorer);
 
-      await marketModel.updateMarket(
-        { quoteAsset: swapFound.quoteAsset },
-        { tradable: true }
-      );
+      // Restart all previously stopped markets
+      const markets = await marketModel.getMarkets({ tradable: false });
+      markets.forEach(async (market: { quoteAsset: string }) => {
+        await marketModel.updateMarket(
+          { quoteAsset: market.quoteAsset },
+          { tradable: true }
+        );
+      });
       await swapModel.updateSwap({ swapAcceptId }, { completed: true, txid });
 
       const reply = new TradeCompleteReply();
