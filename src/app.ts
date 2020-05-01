@@ -1,4 +1,5 @@
 import winston from 'winston';
+import { networks } from 'liquidjs-lib';
 
 import DB from './db/datastore';
 import createLogger from './logger';
@@ -10,6 +11,12 @@ import Market from './components/market';
 import Unspent from './components/unspent';
 import Crawler, { CrawlerInterface, CrawlerType } from './components/crawler';
 import { UtxoInterface } from './utils';
+import Balance from './components/balance';
+
+// Swaps have an average size of 850 bytes.
+// The lower bound of the fee account balance is set to
+// be able to top up fees for at least 5 swaps.
+const FEE_AMOUNT_LIMIT = 4500;
 
 class App {
   logger: winston.Logger;
@@ -62,12 +69,47 @@ class App {
       this.crawler.on(
         'crawler.balance',
         async (walletAddress: string, utxos: Array<UtxoInterface>) => {
-          await Unspent.fromUtxos(
-            walletAddress,
-            utxos,
-            this.datastore.unspents,
-            this.logger
-          );
+          try {
+            await Unspent.fromUtxos(
+              walletAddress,
+              utxos,
+              this.datastore.unspents,
+              this.logger
+            );
+
+            const walletOfFeeAccount = this.vault.derive(
+              0,
+              this.config.network,
+              true
+            );
+
+            if (walletAddress === walletOfFeeAccount.address) {
+              const balance = new Balance(
+                this.datastore.unspents,
+                this.config.explorer[this.config.network]
+              );
+              const lbtc = (networks as any)[this.config.network].assetHash;
+              const lbtcBalance = (
+                await balance.fromAsset(walletAddress, lbtc)
+              )[lbtc].balance;
+
+              if (
+                (this.tradeGrpc.server as any).started &&
+                lbtcBalance < FEE_AMOUNT_LIMIT
+              ) {
+                await this.disableTradesAndDeposits();
+              }
+              if (
+                !(this.tradeGrpc.server as any).started &&
+                lbtcBalance >= FEE_AMOUNT_LIMIT
+              ) {
+                await this.enableTradesAndDeposits();
+              }
+            }
+          } catch (e) {
+            console.error(e);
+            this.logger.error(e.Error());
+          }
         }
       );
 
@@ -90,6 +132,7 @@ class App {
         this.vault,
         this.crawler,
         this.config.network,
+        this.config.explorer[this.config.network],
         this.logger
       );
       this.tradeGrpc = new TradeServer(
@@ -117,6 +160,29 @@ class App {
     await this.operatorGrpc.close();
 
     process.exit(0);
+  }
+
+  async disableTradesAndDeposits(): Promise<void> {
+    this.logger.warn(
+      'Fee account balance too low.\n' +
+        'Shutting down trade server and disabling DepositAddress rpc.\n' +
+        'You must send funds to the fee account address in order to restore them.'
+    );
+    this.operatorGrpc.operatorService.depositsEnabled = false;
+    await this.tradeGrpc.close();
+  }
+
+  async enableTradesAndDeposits(): Promise<void> {
+    return new Promise((resolve) => {
+      this.logger.info(
+        'New funds detected for fee acccount.\n' +
+          'Restoring trade server and deposits.'
+      );
+      const { grpcTrader } = this.config;
+      this.tradeGrpc.listen(grpcTrader.host, grpcTrader.port);
+      this.operatorGrpc.operatorService.depositsEnabled = true;
+      resolve();
+    });
   }
 }
 
