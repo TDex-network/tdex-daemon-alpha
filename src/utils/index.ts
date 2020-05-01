@@ -28,3 +28,8 @@ export function fromSatoshi(x: number): number {
       .replace(',', '')
   );
 }
+
+// Swaps have an average size of 850 bytes.
+// The lower bound of the fee account balance is set to
+// be able to top up fees for at least 5 swaps.
+export const FEE_AMOUNT_LIMIT = 4500;
