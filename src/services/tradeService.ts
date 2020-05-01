@@ -4,6 +4,7 @@ import {
   calculateExpectedAmount,
   calculateProposeAmount,
 } from 'tdex-sdk';
+import { Logger } from 'winston';
 
 import {
   Balance as ProtoBalance,
@@ -13,7 +14,7 @@ import {
   TradeCompleteReply,
   MarketsReply,
   MarketWithFee,
-  Market,
+  Market as ProtoMarket,
   TradeProposeRequest,
   TradeProposeReply,
 } from 'tdex-protobuf/js/trade_pb';
@@ -29,13 +30,15 @@ import Swaps from '../models/swaps';
 import Wallet from '../components/wallet';
 import Balance from '../components/balance';
 import Unspent from '../components/unspent';
+import Market from '../components/market';
 
 class Trade {
   constructor(
     private datastore: DBInterface,
     private vault: VaultInterface,
     private network: string,
-    private explorer: string
+    private explorer: string,
+    private logger: Logger
   ) {}
 
   async markets(
@@ -48,7 +51,7 @@ class Trade {
       const markets = await model.getMarkets({ tradable: true });
       markets.forEach((m: any) => {
         const marketWithfee = new MarketWithFee();
-        const market = new Market();
+        const market = new ProtoMarket();
         market.setBaseAsset(m.baseAsset);
         market.setQuoteAsset(m.quoteAsset);
         marketWithfee.setMarket(market);
@@ -94,7 +97,11 @@ class Trade {
         };
 
       reply.setFee(marketFound.fee);
-      const balance = new Balance(this.datastore.unspents, this.explorer);
+      const balance = new Balance(
+        this.datastore.unspents,
+        this.explorer,
+        this.logger
+      );
       const balances = await balance.fromMarket(marketFound.walletAddress, {
         baseAsset,
         quoteAsset,
@@ -121,6 +128,7 @@ class Trade {
     const marketModel = new Markets(this.datastore.markets);
     const swapModel = new Swaps(this.datastore.swaps);
     let quoteAsset = undefined;
+
     try {
       const market = call.request.getMarket();
       const tradeType = call.request.getType();
@@ -155,7 +163,11 @@ class Trade {
       const amountR = swapRequestMessage!.getAmountR();
       const transaction = swapRequestMessage!.getTransaction();
 
-      const marketBalance = new Balance(this.datastore.unspents, this.explorer);
+      const marketBalance = new Balance(
+        this.datastore.unspents,
+        this.explorer,
+        this.logger
+      );
       const marketBalances = await marketBalance.fromMarket(
         marketFound.walletAddress,
         {
@@ -191,13 +203,17 @@ class Trade {
           throw new Error('Not valid amount_r for the proposed amount_p');
       }
 
-      // Let's stop the market to not process other concurrent swaps
-      await marketModel.updateMarket({ quoteAsset }, { tradable: false });
+      // Let's stop all markets to not process other concurrent swaps
+      await Market.updateAllTradableStatus(
+        false,
+        this.datastore.markets,
+        this.logger
+      );
 
       const derivationIndex = marketFound.derivationIndex;
       const wallet = this.vault.derive(derivationIndex, this.network);
       // add swap input and outputs
-      const unsignedPsbt: string = wallet.updateTx(
+      const unsignedPsbt: any = wallet.updateTx(
         transaction,
         marketUtxos,
         amountR,
@@ -210,23 +226,27 @@ class Trade {
       const feeWallet = this.vault.derive(0, this.network, true);
       // Liquid Bitcoin asset hash
       const bitcoinAssetHash = (networks as any)[this.network].assetHash;
-      const feeBalance = new Balance(this.datastore.unspents, this.explorer);
+      const feeBalance = new Balance(
+        this.datastore.unspents,
+        this.explorer,
+        this.logger
+      );
       const feeUtxos = (
         await feeBalance.fromAsset(feeWallet.address, bitcoinAssetHash)
       )[bitcoinAssetHash].utxos;
 
-      const psbtWithFeesUnsigned: string = feeWallet.payFees(
-        unsignedPsbt,
+      const unsignedPsbtWithFees: any = feeWallet.payFees(
+        unsignedPsbt.base64,
         feeUtxos
       );
 
-      const psbtWithFees = feeWallet.sign(psbtWithFeesUnsigned);
-      const psbtBase64: string = wallet.sign(psbtWithFees);
+      const signedPsbtWithFees = feeWallet.sign(unsignedPsbtWithFees.base64);
+      const signedPsbt: string = wallet.sign(signedPsbtWithFees);
 
       const swap = new Swap({ chain: this.network });
       const swapAcceptMessageSerialized = swap.accept({
         message: swapRequestMessage.serializeBinary(),
-        psbtBase64: psbtBase64,
+        psbtBase64: signedPsbt,
       });
       const swapAcceptMessage = SwapAccept.deserializeBinary(
         swapAcceptMessageSerialized
@@ -243,16 +263,13 @@ class Trade {
       const reply = new TradeProposeReply();
       reply.setSwapAccept(swapAcceptMessage);
 
-      const feeOutpoints = (feeUtxos as any).map(({ txid, vout }: any) => ({
-        txid,
-        vout,
-      }));
-      const marketOutpoints = (marketUtxos as any).map(
-        ({ txid, vout }: any) => ({ txid, vout })
-      );
-      await Unspent.lock(feeOutpoints, swapAcceptId, this.datastore.unspents);
       await Unspent.lock(
-        marketOutpoints,
+        unsignedPsbt.selectedUtxos,
+        swapAcceptId,
+        this.datastore.unspents
+      );
+      await Unspent.lock(
+        unsignedPsbtWithFees.selectedUtxos,
         swapAcceptId,
         this.datastore.unspents
       );
@@ -260,8 +277,11 @@ class Trade {
       call.write(reply);
       call.end();
     } catch (e) {
-      if (quoteAsset)
-        await marketModel.updateMarket({ quoteAsset }, { tradable: true });
+      await Market.updateAllTradableStatus(
+        true,
+        this.datastore.markets,
+        this.logger
+      );
 
       console.error(e);
       call.emit('error', e);
@@ -273,7 +293,6 @@ class Trade {
   async tradeComplete(
     call: grpc.ServerWritableStream<TradeCompleteRequest>
   ): Promise<void> {
-    const marketModel = new Markets(this.datastore.markets);
     const swapModel = new Swaps(this.datastore.swaps);
     const swapComplete = call.request.getSwapComplete();
     const swapAcceptId = swapComplete!.getAcceptId();
@@ -297,9 +316,11 @@ class Trade {
       const hex = Wallet.toHex(transaction);
       const txid = await pushTx(hex, this.explorer);
 
-      await marketModel.updateMarket(
-        { quoteAsset: swapFound.quoteAsset },
-        { tradable: true }
+      // Restart all previously stopped markets
+      await Market.updateAllTradableStatus(
+        true,
+        this.datastore.markets,
+        this.logger
       );
       await swapModel.updateSwap({ swapAcceptId }, { completed: true, txid });
 

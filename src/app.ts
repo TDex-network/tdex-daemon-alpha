@@ -9,7 +9,9 @@ import { initVault, VaultInterface } from './components/vault';
 import Market from './components/market';
 import Unspent from './components/unspent';
 import Crawler, { CrawlerInterface, CrawlerType } from './components/crawler';
-import { UtxoInterface } from './utils';
+import { UtxoInterface, FEE_AMOUNT_LIMIT } from './utils';
+import Balance from './components/balance';
+import Swap from './components/swap';
 
 class App {
   logger: winston.Logger;
@@ -68,6 +70,59 @@ class App {
             this.datastore.unspents,
             this.logger
           );
+
+          try {
+            if (walletAddress === walletOfFeeAccount.address) {
+              const { explorer, market, network } = this.config;
+              const balance = new Balance(
+                this.datastore.unspents,
+                explorer[network],
+                this.logger
+              );
+
+              const lbtc = market.baseAsset[network];
+              const lbtcBalance = (
+                await balance.fromAsset(walletAddress, lbtc)
+              )[lbtc].balance;
+              const allTradableMarkets = await Market.areAllTradable(
+                this.datastore.markets,
+                this.logger
+              );
+              const pendingSwaps = await Swap.anyPending(
+                this.datastore.swaps,
+                this.logger
+              );
+
+              if (allTradableMarkets && lbtcBalance < FEE_AMOUNT_LIMIT) {
+                this.logger.warn(
+                  'Fee account balance too low.\n' +
+                    'Trades and deposits will be disbaled.\n' +
+                    `You must send funds to the fee account address (${walletAddress}) in order to restore them.`
+                );
+                await Market.updateAllTradableStatus(
+                  false,
+                  this.datastore.markets,
+                  this.logger
+                );
+              }
+              if (
+                !allTradableMarkets &&
+                !pendingSwaps &&
+                lbtcBalance >= FEE_AMOUNT_LIMIT
+              ) {
+                await Market.updateAllTradableStatus(
+                  true,
+                  this.datastore.markets,
+                  this.logger
+                );
+              }
+            }
+          } catch (e) {
+            console.error(e);
+            this.logger.error(
+              `Error while checking balance for fee account: ${e}`
+            );
+          }
         }
       );
 
@@ -90,6 +145,7 @@ class App {
         this.vault,
         this.crawler,
         this.config.network,
+        this.config.explorer[this.config.network],
         this.logger
       );
       this.tradeGrpc = new TradeServer(

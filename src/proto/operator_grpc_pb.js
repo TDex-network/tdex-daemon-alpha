@@ -26,6 +26,28 @@ function deserialize_DepositAddressRequest(buffer_arg) {
   return operator_pb.DepositAddressRequest.deserializeBinary(new Uint8Array(buffer_arg));
 }
 
+function serialize_FeeBalanceReply(arg) {
+  if (!(arg instanceof operator_pb.FeeBalanceReply)) {
+    throw new Error('Expected argument of type FeeBalanceReply');
+  }
+  return Buffer.from(arg.serializeBinary());
+}
+
+function deserialize_FeeBalanceReply(buffer_arg) {
+  return operator_pb.FeeBalanceReply.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
+function serialize_FeeBalanceRequest(arg) {
+  if (!(arg instanceof operator_pb.FeeBalanceRequest)) {
+    throw new Error('Expected argument of type FeeBalanceRequest');
+  }
+  return Buffer.from(arg.serializeBinary());
+}
+
+function deserialize_FeeBalanceRequest(buffer_arg) {
+  return operator_pb.FeeBalanceRequest.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
 function serialize_FeeDepositAddressReply(arg) {
   if (!(arg instanceof operator_pb.FeeDepositAddressReply)) {
     throw new Error('Expected argument of type FeeDepositAddressReply');
@@ -71,6 +93,17 @@ var OperatorService = exports.OperatorService = {
     requestDeserialize: deserialize_FeeDepositAddressRequest,
     responseSerialize: serialize_FeeDepositAddressReply,
     responseDeserialize: deserialize_FeeDepositAddressReply,
+  },
+  feeBalance: {
+    path: '/Operator/FeeBalance',
+    requestStream: false,
+    responseStream: false,
+    requestType: operator_pb.FeeBalanceRequest,
+    responseType: operator_pb.FeeBalanceReply,
+    requestSerialize: serialize_FeeBalanceRequest,
+    requestDeserialize: deserialize_FeeBalanceRequest,
+    responseSerialize: serialize_FeeBalanceReply,
+    responseDeserialize: deserialize_FeeBalanceReply,
   },
 };
 

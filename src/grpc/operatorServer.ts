@@ -8,22 +8,26 @@ import { CrawlerInterface } from '../components/crawler';
 
 export default class OperatorServer {
   server: Server;
+  operatorService: Operator;
 
   constructor(
     private datastore: DBInterface,
     private vault: VaultInterface,
     private crawler: CrawlerInterface,
     private network: string,
+    private explorer: string,
     private logger: Logger
   ) {
     this.server = new Server();
-    const serviceImplementation = new Operator(
+    this.operatorService = new Operator(
       this.datastore,
       this.vault,
       this.crawler,
-      this.network
+      this.network,
+      this.explorer,
+      this.logger
     );
-    this.server.addService(OperatorService, serviceImplementation as any);
+    this.server.addService(OperatorService, this.operatorService as any);
   }
 
   listen(host: string, port: number): void {

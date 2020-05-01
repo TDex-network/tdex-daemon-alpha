@@ -36,6 +36,9 @@ describe('End to end testing', () => {
     );
     // Fund the fee wallet
     await faucet(feeAddress);
+    await faucet(feeAddress);
+    // Give some time to the crawler to catchup
+    await sleep(1000);
 
     // Get an address for creating a new market
     const marketAddress = await depositAddress();
@@ -75,7 +78,7 @@ describe('End to end testing', () => {
     const traderUtxos = await fetchUtxos(traderWallet.address, LBTC);
 
     const emptyPsbt = Wallet.createTx();
-    const psbtBase64 = traderWallet.updateTx(
+    const psbt = traderWallet.updateTx(
       emptyPsbt,
       traderUtxos,
       amountToBeSent,
@@ -90,7 +93,7 @@ describe('End to end testing', () => {
       amountToBeSent: amountToBeSent,
       assetToReceive: USDT,
       amountToReceive: amountToReceive,
-      psbtBase64,
+      psbtBase64: psbt.base64,
     });
 
     // 0 === Buy === receiving base_asset; 1 === sell === receiving quote_asset
@@ -101,6 +104,9 @@ describe('End to end testing', () => {
       swapRequestSerialized
     );
     expect(swapAcceptSerialized).toBeDefined();
+
+    // check that markets have been stopped
+    expect((await markets()).length).toStrictEqual(0);
 
     // trader need to check the signed inputs by the provider
     // and add his own inputs if all is correct
@@ -153,7 +159,7 @@ describe('End to end testing', () => {
       amountToBeSent: amountToBeSent2,
       assetToReceive: LBTC,
       amountToReceive: amountToReceive2,
-      psbtBase64: psbt2,
+      psbtBase64: psbt2.base64,
     });
     // 0 === Buy === receiving base_asset; 1 === sell === receiving quote_asset
     const tradeType2 = 0;

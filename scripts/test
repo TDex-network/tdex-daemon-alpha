@@ -7,7 +7,7 @@ pushd $PARENT_PATH
 
 nigiri stop --delete
 nigiri start --liquid
-sleep 10s
+sleep 20s
 yarn clean
 export TDEX_DAEMON_PATH=$(pwd)/test/datadir 
 npx jest test --detectOpenHandles

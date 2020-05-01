@@ -75,3 +75,39 @@ export namespace FeeDepositAddressReply {
   }
 }
 
+export class FeeBalanceRequest extends jspb.Message {
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): FeeBalanceRequest.AsObject;
+  static toObject(includeInstance: boolean, msg: FeeBalanceRequest): FeeBalanceRequest.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: FeeBalanceRequest, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): FeeBalanceRequest;
+  static deserializeBinaryFromReader(message: FeeBalanceRequest, reader: jspb.BinaryReader): FeeBalanceRequest;
+}
+
+export namespace FeeBalanceRequest {
+  export type AsObject = {
+  }
+}
+
+export class FeeBalanceReply extends jspb.Message {
+  getBalance(): number;
+  setBalance(value: number): void;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): FeeBalanceReply.AsObject;
+  static toObject(includeInstance: boolean, msg: FeeBalanceReply): FeeBalanceReply.AsObject;
+  static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+  static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+  static serializeBinaryToWriter(message: FeeBalanceReply, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): FeeBalanceReply;
+  static deserializeBinaryFromReader(message: FeeBalanceReply, reader: jspb.BinaryReader): FeeBalanceReply;
+}
+
+export namespace FeeBalanceReply {
+  export type AsObject = {
+    balance: number,
+  }
+}
+

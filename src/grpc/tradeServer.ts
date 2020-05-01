@@ -16,12 +16,12 @@ export default class TradeServer {
     private logger: Logger
   ) {
     this.server = new Server();
-
     const service = new Trade(
       this.datastore,
       this.vault,
       this.network,
-      this.explorer
+      this.explorer,
+      this.logger
     );
     this.server.addService(TradeService, service as any);
   }
