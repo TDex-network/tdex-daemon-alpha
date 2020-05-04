@@ -127,26 +127,28 @@ class Trade {
   ): Promise<void> {
     const marketModel = new Markets(this.datastore.markets);
     const swapModel = new Swaps(this.datastore.swaps);
-    const market = call.request.getMarket();
-    const tradeType = call.request.getType();
-    const swapRequestMessage = call.request.getSwapRequest();
-    this.logger.info(
-      `Received ${
-        tradeType === TradeProposeRequest.Type.BUY ? 'BUY' : 'SELL'
-      } trade proposal for market ${JSON.stringify(
-        market!.toObject(),
-        null,
-        2
-      )} with id: ${swapRequestMessage!.getId()}`
-    );
 
     try {
+      const market = call.request.getMarket();
+      const tradeType = call.request.getType();
+      const swapRequestMessage = call.request.getSwapRequest();
       if (!market || !swapRequestMessage)
         throw {
           code: grpc.status.INVALID_ARGUMENT,
           name: 'INVALID_ARGUMENT',
           message: 'Malformed request',
         };
+
+      this.logger.info(
+        `Received ${
+          tradeType === TradeProposeRequest.Type.BUY ? 'BUY' : 'SELL'
+        } trade proposal for market ${JSON.stringify(
+          market!.toObject(),
+          null,
+          2
+        )} with id: ${swapRequestMessage!.getId()}`
+      );
+
       const quoteAsset = market!.getQuoteAsset();
       const marketFound = await marketModel.getMarket({ quoteAsset });
       if (!marketFound)
@@ -293,7 +295,7 @@ class Trade {
         this.logger
       );
 
-      this.logger.info(`Trade proposal rejected for reason: ${e.Error()}`);
+      this.logger.info(`Trade proposal rejected for reason: ${e}`);
       call.emit('error', e);
       call.write(e);
       call.end();
@@ -304,19 +306,21 @@ class Trade {
     call: grpc.ServerWritableStream<TradeCompleteRequest>
   ): Promise<void> {
     const swapModel = new Swaps(this.datastore.swaps);
-    const swapComplete = call.request.getSwapComplete();
-    const swapAcceptId = swapComplete!.getAcceptId();
-    this.logger.info(
-      `Received trade complete request with id: ${swapAcceptId}`
-    );
+    let swapAcceptId = undefined;
 
     try {
+      const swapComplete = call.request.getSwapComplete();
+      swapAcceptId = swapComplete!.getAcceptId();
       if (!swapComplete || !swapAcceptId)
         throw {
           code: grpc.status.INVALID_ARGUMENT,
           name: 'INVALID_ARGUMENT',
           message: 'Malformed request',
         };
+
+      this.logger.info(
+        `Received trade complete request with id: ${swapAcceptId}`
+      );
 
       const swapFound = await swapModel.getSwap({ swapAcceptId });
       if (!swapFound)
@@ -347,9 +351,10 @@ class Trade {
       call.write(reply);
       call.end();
     } catch (e) {
-      await Unspent.unlock(swapAcceptId, this.datastore.unspents);
+      if (swapAcceptId)
+        await Unspent.unlock(swapAcceptId, this.datastore.unspents);
 
-      this.logger.info(`Trade failed for reason: ${e.Error()}`);
+      this.logger.info(`Trade failed for reason: ${e}`);
       call.emit('error', e);
       call.write(e);
       call.end();
