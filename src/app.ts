@@ -44,6 +44,16 @@ class App {
     try {
       this.vault = await initVault(this.config.datadir);
 
+      const walletOfMarkets = await Market.getWallets(
+        this.datastore.markets,
+        this.logger
+      );
+      const walletOfFeeAccount = this.vault.derive(
+        0,
+        this.config.network,
+        true
+      );
+
       this.crawler.on(
         'crawler.deposit',
         async (walletAddress: string, pair: Array<UtxoInterface>) => {
@@ -126,15 +136,6 @@ class App {
         }
       );
 
-      const walletOfMarkets = await Market.getWallets(
-        this.datastore.markets,
-        this.logger
-      );
-      const walletOfFeeAccount = this.vault.derive(
-        0,
-        this.config.network,
-        true
-      );
       this.crawler.startAll(
         CrawlerType.BALANCE,
         walletOfMarkets.concat(walletOfFeeAccount.address)
