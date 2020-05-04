@@ -139,17 +139,14 @@ class Trade {
           message: 'Malformed request',
         };
 
+      const quoteAsset = market!.getQuoteAsset();
+
       this.logger.info(
         `Received ${
           tradeType === TradeProposeRequest.Type.BUY ? 'BUY' : 'SELL'
-        } trade proposal for market ${JSON.stringify(
-          market!.toObject(),
-          null,
-          2
-        )} with id: ${swapRequestMessage!.getId()}`
+        } trade proposal with id: ${swapRequestMessage!.getId()} for asset ${quoteAsset}`
       );
 
-      const quoteAsset = market!.getQuoteAsset();
       const marketFound = await marketModel.getMarket({ quoteAsset });
       if (!marketFound)
         throw {
