@@ -32,7 +32,7 @@ $ tdex-daemon
 
 It will be created a wallet for the daemon and stored in the chosen data directory in a file `vault.json`.
 
-You can decide to encrypt it with a password and if you decide to do so the daemon will save it encrypted and shutdown.
+You can encrypt it with a password and if you decide to do so the daemon will save it encrypted and shutdown.
 
 Then start again exporting the environment variable `TDEX_PASSWORD` with the chosen password so the daemon could automatically process incoming swap requests. 
 > DO NOT FORGET THE PASSWORD, OR YOU WILL NOT BE ABLE TO RECOVER YOUR FUNDS
@@ -48,16 +48,17 @@ If running on a VPS or the cloud, open the ports for the two gRPC interfaces.
 
 ## 💰 Deposit funds
 
-To start a market you need to deposit two reserves for the pair you are providing liquidity for. The initial ratio of two amounts you deposit will represent the starting price you give to that pair. 
+To start a market, you need to deposit two reserves for the pair you are providing liquidity for. 
+The initial ratio of two amounts you deposit will represent the starting price you give to that pair. 
 
-From that point on the market making strategy will self regulate the trading price.
+From that point on, the **market making strategy will self regulate the trading price**.
 
 You will also need to deposit in a different address an amount of LBTCs used by all markets to pay for transaction fees.
 
 1. Download and install the [`tdex-cli`](https://github.com/Sevenlab/tdex-cli) 
 2. Connect the CLI to the daemon with the gRPC **operator** interface. 
 ```sh
-$ tdex-cli connect localhost:9000
+$ tdex-cli operator connect localhost:9000
 ```
 3. Get the deposit address for the fee account and send some L-BTC
 ```
