@@ -22,7 +22,6 @@
     "bip32": "^2.0.5",
     "bip39": "^3.0.2",
     "enquirer": "^2.3.5",
-    "google-protobuf": "^3.11.4",
     "grpc": "^1.24.2",
     "liquidjs-lib": "vulpemventures/liquidjs-lib",
     "nedb": "^1.8.0",
@@ -32,7 +31,6 @@
     "winston": "^3.2.1"
   },
   "devDependencies": {
-    "@types/google-protobuf": "^3.7.2",
     "@types/jest": "^25.2.1",
     "@types/nedb": "^1.8.9",
     "@types/node": "^13.13.1",
