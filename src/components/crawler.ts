@@ -35,7 +35,7 @@ export default class Crawler extends EventEmitter implements CrawlerInterface {
   constructor(private network: string, private explorer: string) {
     super();
 
-    this.interval = this.network === 'liquid' ? 60 * 1000 : 200;
+    this.interval = this.network === 'liquid' ? 60 * 1000 : 5000;
     this.storage = {};
     this.timer = {};
   }
@@ -79,35 +79,42 @@ export default class Crawler extends EventEmitter implements CrawlerInterface {
   }
 
   private async processBalance(address: string) {
-    const fetchedUtxos = await fetchUtxosWithUrl(address, this.explorer);
-    this.emit('crawler.balance', address, fetchedUtxos);
+    try {
+      const fetchedUtxos = await fetchUtxosWithUrl(address, this.explorer);
+      this.emit('crawler.balance', address, fetchedUtxos);
+    } catch (ignore) {
+      console.error(ignore);
+    }
   }
 
   private async processDeposit(address: string) {
-    const fetchedUtxos = await fetchUtxosWithUrl(address, this.explorer);
+    try {
+      const fetchedUtxos = await fetchUtxosWithUrl(address, this.explorer);
+      if (!this.storage.hasOwnProperty(address)) this.storage[address] = [];
 
-    if (!this.storage.hasOwnProperty(address)) this.storage[address] = [];
+      const storageByAddress = this.storage[address];
 
-    const storageByAddress = this.storage[address];
+      const toAdd: Array<UtxoInterface> = fetchedUtxos.filter(
+        (utxo: UtxoInterface) => {
+          const exist = storageByAddress.some(
+            (s: { txid: string; vout: number }) =>
+              s.txid === utxo.txid && s.vout === utxo.vout
+          );
+          return !exist;
+        }
+      );
 
-    const toAdd: Array<UtxoInterface> = fetchedUtxos.filter(
-      (utxo: UtxoInterface) => {
-        const exist = storageByAddress.some(
-          (s: { txid: string; vout: number }) =>
-            s.txid === utxo.txid && s.vout === utxo.vout
-        );
-        return !exist;
+      if (toAdd.length === 2) {
+        const [first, second] = toAdd;
+        if (first.asset !== second.asset) {
+          this.storage[address].push(first, second);
+          this.emit('crawler.deposit', address, [first, second]);
+          this.stop(CrawlerType.DEPOSIT, address);
+          this.start(CrawlerType.BALANCE, address);
+        }
       }
-    );
-
-    if (toAdd.length === 2) {
-      const [first, second] = toAdd;
-      if (first.asset !== second.asset) {
-        this.storage[address].push(first, second);
-        this.emit('crawler.deposit', address, [first, second]);
-        this.stop(CrawlerType.DEPOSIT, address);
-        this.start(CrawlerType.BALANCE, address);
-      }
+    } catch (ignore) {
+      console.error(ignore);
     }
   }
 }
