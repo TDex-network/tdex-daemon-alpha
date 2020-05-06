@@ -175,14 +175,13 @@ export default class Wallet implements WalletInterface {
       throw new Error('Invalid psbt');
     }
 
-    const index = psbt.data.inputs.findIndex(
-      (p) => p.witnessUtxo!.script.toString('hex') === this.script
-    );
-
-    psbt.signInput(index, this.keyPair);
-
-    if (!psbt.validateSignaturesOfInput(index))
-      throw new Error('Invalid signature');
+    psbt.data.inputs.forEach((p, i) => {
+      if (p.witnessUtxo!.script.toString('hex') === this.script) {
+        psbt.signInput(i, this.keyPair);
+        if (!psbt.validateSignaturesOfInput(i))
+          throw new Error('Invalid signature');
+      }
+    });
 
     return psbt.toBase64();
   }

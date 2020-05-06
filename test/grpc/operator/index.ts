@@ -1,7 +1,7 @@
 import * as grpc from 'grpc';
 
-import * as services from '../../../src/proto/operator_grpc_pb';
-import * as messages from '../../../src/proto/operator_pb';
+import * as services from 'tdex-protobuf/js/operator_grpc_pb';
+import * as messages from 'tdex-protobuf/js/operator_pb';
 
 const operatorClient = new services.OperatorClient(
   'localhost:9000',
