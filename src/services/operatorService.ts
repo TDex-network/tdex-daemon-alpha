@@ -2,12 +2,12 @@ import grpc from 'grpc';
 import { networks } from 'liquidjs-lib';
 import { Logger } from 'winston';
 
-import { OperatorService } from '../proto/operator_grpc_pb';
+import { OperatorService } from 'tdex-protobuf/js/operator_grpc_pb';
 import {
   DepositAddressReply,
   FeeDepositAddressReply,
   FeeBalanceReply,
-} from '../proto/operator_pb';
+} from 'tdex-protobuf/js/operator_pb';
 import Markets from '../models/markets';
 import { DBInterface } from '../db/datastore';
 import { VaultInterface } from '../components/vault';
