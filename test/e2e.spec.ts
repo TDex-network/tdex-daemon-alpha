@@ -38,7 +38,7 @@ describe('End to end testing', () => {
     await faucet(feeAddress);
     await faucet(feeAddress);
     // Give some time to the crawler to catchup
-    await sleep(1000);
+    await sleep(5000);
 
     // Get an address for creating a new market
     const marketAddress = await depositAddress();
