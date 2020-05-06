@@ -14,8 +14,7 @@
     "start": "npx ts-node src",
     "lint": "bash scripts/lint",
     "clean": "bash scripts/clean",
-    "test": "bash scripts/test",
-    "protobuf": "bash scripts/compile-proto"
+    "test": "bash scripts/test"
   },
   "dependencies": {
     "axios": "^0.19.2",
