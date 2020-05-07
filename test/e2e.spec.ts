@@ -17,7 +17,10 @@ describe('End to end testing', () => {
     'cSv4PQtTpvYKHjfp9qih2RMeieBQAVADqc8JGXPvA7mkJ8yD5QC1',
     networks.regtest
   );
-  const app = new App();
+  const app = new App({
+    regtest: true,
+    explorer: 'http://localhost:3001',
+  });
   // Start the daemon
   beforeAll(async () => {
     try {

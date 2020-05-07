@@ -27,8 +27,7 @@ const options = require('yargs') // eslint-disable-line
   .option('explorer', {
     alias: 'e',
     type: 'string',
-    description:
-      'Specify an Electrs HTTP REST endpoint to use a different explorer',
+    description: 'Specify an Electrs HTTP REST endpoint',
   }).argv;
 
 async function main() {
