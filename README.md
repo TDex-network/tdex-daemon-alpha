@@ -24,7 +24,7 @@ Once the daemon is launched it will create a data directory `~/.tdex-daemon` con
 It's possible to use a different path for the data directory with the environment variable `TDEX_DAEMON_PATH`
 
 ```sh
-$ tdex-daemon
+$ tdex-daemon --regtest
 ? How do you want to store your seed? 🔑 … 
 ❯ Encrypted (AES-128-CBC)
   Plain Text (not recommended)
@@ -70,6 +70,17 @@ $ tdex-cli operator deposit
 ```
 5. Profit! 
 
+## 🖥 Available options
+
+```sh
+Options:
+  --help          Show help                                            
+  --version       Show version number                                  
+  --regtest, -r   Run in regtest mode                 
+  --fee, -f       Specify a default fee to be used by markets
+  --explorer, -e  Specify an Electrs HTTP REST endpoint                                         
+```
+> If a `config.json` file already exists in the chosen `datadir` given arguments will be discarded.
 
 ## 🛣 Roadmap
 
