@@ -11,8 +11,28 @@ Liquidity providers can spin up the alpha-daemon with custom configuration file,
  */
 import App from './app';
 
+const options = require('yargs') // eslint-disable-line
+  .option('regtest', {
+    alias: 'r',
+    type: 'boolean',
+    default: false,
+    description: 'Run in regtest mode',
+  })
+  .option('fee', {
+    alias: 'f',
+    type: 'number',
+    default: 0.25,
+    description: 'Specify a default fee to be used by markets',
+  })
+  .option('explorer', {
+    alias: 'e',
+    type: 'string',
+    description:
+      'Specify an Electrs HTTP REST endpoint to use a different explorer',
+  }).argv;
+
 async function main() {
-  const app = new App();
+  const app = new App(options);
   try {
     await app.start();
   } catch (err) {

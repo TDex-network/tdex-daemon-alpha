@@ -22,13 +22,14 @@ class App {
   datastore: DB;
   crawler: CrawlerInterface;
 
-  constructor() {
+  constructor(options: any) {
     this.logger = createLogger();
-    this.config = Config();
+    this.config = Config(options);
     this.datastore = new DB(this.config.datadir);
     this.crawler = new Crawler(
       this.config.network,
-      this.config.explorer[this.config.network]
+      this.config.explorer[this.config.network],
+      this.logger
     );
 
     process.on('SIGINT', async () => {

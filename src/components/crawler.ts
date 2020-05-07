@@ -1,5 +1,6 @@
 import { EventEmitter } from 'events';
 import { fetchUtxosWithUrl, UtxoInterface } from '../utils';
+import { Logger } from 'winston';
 
 export enum CrawlerType {
   DEPOSIT = 'DEPOSIT',
@@ -32,7 +33,11 @@ export default class Crawler extends EventEmitter implements CrawlerInterface {
   storage: any;
   timer: any;
 
-  constructor(private network: string, private explorer: string) {
+  constructor(
+    private network: string,
+    private explorer: string,
+    private logger: Logger
+  ) {
     super();
 
     this.interval = this.network === 'liquid' ? 60 * 1000 : 5000;
@@ -83,7 +88,7 @@ export default class Crawler extends EventEmitter implements CrawlerInterface {
       const fetchedUtxos = await fetchUtxosWithUrl(address, this.explorer);
       this.emit('crawler.balance', address, fetchedUtxos);
     } catch (ignore) {
-      console.error(ignore);
+      this.logger.error('[CRAWLER][BALANCE] Bad response from explorer');
     }
   }
 
@@ -114,7 +119,7 @@ export default class Crawler extends EventEmitter implements CrawlerInterface {
         }
       }
     } catch (ignore) {
-      console.error(ignore);
+      this.logger.error('[CRAWLER][DEPOSIT] Bad response from explorer');
     }
   }
 }

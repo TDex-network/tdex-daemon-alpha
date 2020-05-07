@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
+import { isValidUrl } from './utils';
 
 export interface ConfigInterface {
   datadir: string;
@@ -12,13 +13,33 @@ export interface ConfigInterface {
   tickers: any;
 }
 
-function defaultConfig(): any {
+const EXPLORER_API = {
+  liquid: 'https://blockstream.info/liquid/api',
+  regtest: 'https://nigiri.network/liquid/api',
+};
+
+function isValidFee(fee: number) {
+  if (
+    fee &&
+    typeof fee === 'number' &&
+    fee > 0 &&
+    fee < 1 &&
+    !Number.isInteger(fee)
+  )
+    return true;
+
+  return false;
+}
+
+function defaultConfig(opts: any): any {
+  const network = opts.regtest ? 'regtest' : 'liquid';
+  const fee = isValidFee(opts.fee) ? opts.fee : 0.25;
+  const explorer = isValidUrl(opts.explorer)
+    ? { ...EXPLORER_API, [network]: opts.explorer }
+    : EXPLORER_API;
   return {
-    network: 'regtest',
-    explorer: {
-      liquid: 'https://blockstream.info/liquid/api',
-      regtest: 'https://nigiri.network/liquid/api',
-    },
+    network,
+    explorer,
     grpcOperator: {
       host: '0.0.0.0',
       port: '9000',
@@ -28,7 +49,7 @@ function defaultConfig(): any {
       port: '9945',
     },
     market: {
-      fee: 0.25,
+      fee,
       baseAsset: {
         liquid:
           '6f0279e9ed041c3d710a9f57d0c02928416460c4b722ae3457a11eec381c526d',
@@ -50,7 +71,7 @@ function defaultDatadir(): string {
   return path.join(homedir, '.tdex-daemon');
 }
 
-export default function Config(): ConfigInterface {
+export default function Config(options: any): ConfigInterface {
   let datadir: string;
   const { TDEX_DAEMON_PATH } = process.env;
   if (TDEX_DAEMON_PATH) {
@@ -67,7 +88,7 @@ export default function Config(): ConfigInterface {
 
   const configPath = path.join(datadir, 'config.json');
   if (!fs.existsSync(configPath)) {
-    const config = defaultConfig();
+    const config = defaultConfig(options);
     const serialized = JSON.stringify(config, undefined, 2);
     fs.writeFileSync(configPath, serialized, { encoding: 'utf8', flag: 'w' });
   }
