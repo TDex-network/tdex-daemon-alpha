@@ -112,6 +112,7 @@ $ docker build -t sevenlab/tdex-daemon .
 $ docker run --name tdex --restart unless-stopped  -p 9945 -p 9000 -v $(pwd)/data:/root/.tdex-daemon -it sevenlab/tdex-daemon
 ```
 
+To detach the tty without exiting the shell, use the escape sequence Ctrl+P followed by Ctrl+Q
 
 ## 🖥 Local Development
 
