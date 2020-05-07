@@ -19,14 +19,7 @@ const EXPLORER_API = {
 };
 
 function isValidFee(fee: number) {
-  if (
-    fee &&
-    typeof fee === 'number' &&
-    fee > 0 &&
-    fee < 1 &&
-    !Number.isInteger(fee)
-  )
-    return true;
+  if (fee && typeof fee === 'number' && fee > 0 && fee < 1) return true;
 
   return false;
 }
