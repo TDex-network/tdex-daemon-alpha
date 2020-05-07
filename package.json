@@ -11,6 +11,8 @@
   "scripts": {
     "watch": "npx tsc --watch",
     "build": "npx tsc",
+    "build-mac": "yarn build && npx nexe dist/index.js -t darwin-x64 -o bin/tdex-daemon-darwin",
+    "build-linux": "yarn build &&  npx nexe dist/index.js -t linux-x64 -o bin/tdex-daemon-linux",
     "start": "npx ts-node src",
     "lint": "bash scripts/lint",
     "clean": "bash scripts/clean",
@@ -43,6 +45,7 @@
     "grpc-tools": "^1.8.1",
     "husky": "^4.2.5",
     "jest": "^25.3.0",
+    "nexe": "^3.3.2",
     "prettier": "^2.0.4",
     "rimraf": "^3.0.2",
     "ts-jest": "^25.4.0",

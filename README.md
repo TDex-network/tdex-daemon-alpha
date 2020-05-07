@@ -90,9 +90,33 @@ Options:
 * [x] Crawler
 * [x] Market making
 
+
+## 🐳 Docker
+
+
+# Build 
+
+```sh
+# Enter the project folder and install node dependencies
+$ cd tdex-daemon-alpha
+$ yarn install
+# Build Nexe bundle for Linux amd64 
+$ yarn build-linux
+# Build docker image
+$ docker build -t sevenlab/tdex-daemon .
+```
+
+# Run 
+
+```sh
+$ docker run --name tdex --restart unless-stopped  -p 9945 -p 9000 -v $(pwd)/data:/root/.tdex-daemon -it sevenlab/tdex-daemon
+```
+
+To detach the tty without exiting the shell, use the escape sequence Ctrl+P followed by Ctrl+Q
+
 ## 🖥 Local Development
 
-Below is a list of commands you will probably find useful.
+Below is a list of commands you will probably find useful for local development.
 
 ### `yarn start`
 
@@ -106,6 +130,14 @@ Runs the project in watch mode. Your project will be rebuilt upon changes.
 
 Bundles the package to the `dist` folder.
 
+### `yarn build-linux`
+
+Build the TypeScript project and bundle with `Nexe` for Linux amd64 platform
+
+### `yarn build-mac`
+
+Build the TypeScript project and bundle with `Nexe` for Mac OS platform
+
 ### `yarn lint`
 
 Try building the project and runs Eslint and Prettier
@@ -113,3 +145,4 @@ Try building the project and runs Eslint and Prettier
 ### `yarn test`
 
 Runs the test watcher (Jest) in an interactive mode. Requires [Nigiri](https://nigiri.vulpem.com/#install) to already be installed.
+

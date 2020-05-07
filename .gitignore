@@ -1,4 +1,5 @@
 dist
+bin/
 .DS_Store
 /test/datadir/db
 /test/datadir/config.json
