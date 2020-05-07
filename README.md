@@ -80,6 +80,7 @@ Options:
   --fee, -f       Specify a default fee to be used by markets
   --explorer, -e  Specify an Electrs HTTP REST endpoint                                         
 ```
+> If a `config.json` file already exists in the chosen `datadir` given arguments will be discarded.
 
 ## 🛣 Roadmap
 

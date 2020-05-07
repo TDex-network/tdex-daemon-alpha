@@ -2,6 +2,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 import { isValidUrl } from './utils';
+import { Logger } from 'winston';
 
 export interface ConfigInterface {
   datadir: string;
@@ -24,12 +25,24 @@ function isValidFee(fee: number) {
   return false;
 }
 
-function defaultConfig(opts: any): any {
+function defaultConfig(logger: Logger, opts: any): any {
   const network = opts.regtest ? 'regtest' : 'liquid';
-  const fee = isValidFee(opts.fee) ? opts.fee : 0.25;
-  const explorer = isValidUrl(opts.explorer)
-    ? { ...EXPLORER_API, [network]: opts.explorer }
-    : EXPLORER_API;
+  let fee, explorer;
+
+  if (!isValidFee(opts.fee)) {
+    fee = 0.25;
+    logger.warn(`Given fee is not valid. Default ${fee}`);
+  }
+  if (!isValidUrl(opts.explorer)) {
+    explorer = EXPLORER_API;
+    opts.explorer !== undefined &&
+      logger.warn(
+        `Given explorer URL is not valid. Default: ${explorer[network]}`
+      );
+  }
+  fee = opts.fee;
+  explorer = { ...EXPLORER_API, [network]: opts.explorer };
+
   return {
     network,
     explorer,
@@ -64,7 +77,7 @@ function defaultDatadir(): string {
   return path.join(homedir, '.tdex-daemon');
 }
 
-export default function Config(options: any): ConfigInterface {
+export default function Config(logger: Logger, options: any): ConfigInterface {
   let datadir: string;
   const { TDEX_DAEMON_PATH } = process.env;
   if (TDEX_DAEMON_PATH) {
@@ -81,9 +94,13 @@ export default function Config(options: any): ConfigInterface {
 
   const configPath = path.join(datadir, 'config.json');
   if (!fs.existsSync(configPath)) {
-    const config = defaultConfig(options);
+    const config = defaultConfig(logger, options);
     const serialized = JSON.stringify(config, undefined, 2);
     fs.writeFileSync(configPath, serialized, { encoding: 'utf8', flag: 'w' });
+  } else if (Object.keys(options).length > 0) {
+    logger.warn(
+      'Configuration file already exists. Given arguments will be discarded'
+    );
   }
 
   let configObject: any;

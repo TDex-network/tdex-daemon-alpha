@@ -24,7 +24,7 @@ class App {
 
   constructor(options: any) {
     this.logger = createLogger();
-    this.config = Config(options);
+    this.config = Config(this.logger, options);
     this.datastore = new DB(this.config.datadir);
     this.crawler = new Crawler(
       this.config.network,
