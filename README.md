@@ -109,7 +109,7 @@ $ docker build -t sevenlab/tdex-daemon .
 # Run 
 
 ```sh
-$ docker run -p 9945 -p 9000 -d sevenlab/tdex-daemon --fee 0.5
+$ docker run --name tdex --restart unless-stopped  -p 9945 -p 9000 -v $(pwd)/data:/root/.tdex-daemon -it sevenlab/tdex-daemon
 ```
 
 
