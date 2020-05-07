@@ -21,7 +21,6 @@ const options = require('yargs') // eslint-disable-line
   .option('fee', {
     alias: 'f',
     type: 'number',
-    default: 0.25,
     description: 'Specify a default fee to be used by markets',
   })
   .option('explorer', {

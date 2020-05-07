@@ -55,7 +55,7 @@ describe('End to end testing', () => {
     expect(USDT).toBeDefined();
 
     //Give some time to the crawler to catchup
-    await sleep(5000);
+    await sleep(10000);
 
     const tradableMarkets = await markets();
     expect(tradableMarkets.length).toStrictEqual(1);
@@ -137,7 +137,7 @@ describe('End to end testing', () => {
      * Now let's try to BUY
      */
 
-    await sleep(1000);
+    await sleep(10000);
     const balancesAndFee2 = await balances({ baseAsset, quoteAsset });
     const amountToReceive2 = 5000;
     const amountToBeSent2 = calculateProposeAmount(

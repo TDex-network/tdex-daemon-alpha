@@ -27,11 +27,13 @@ function isValidFee(fee: number) {
 
 function defaultConfig(logger: Logger, opts: any): any {
   const network = opts.regtest ? 'regtest' : 'liquid';
-  let fee, explorer;
 
+  let fee = opts.fee;
+  let explorer = { ...EXPLORER_API, [network]: opts.explorer };
   if (!isValidFee(opts.fee)) {
     fee = 0.25;
-    logger.warn(`Given fee is not valid. Default ${fee}`);
+    opts.fee !== undefined &&
+      logger.warn(`Given fee is not valid. Default ${fee}`);
   }
   if (!isValidUrl(opts.explorer)) {
     explorer = EXPLORER_API;
@@ -40,8 +42,6 @@ function defaultConfig(logger: Logger, opts: any): any {
         `Given explorer URL is not valid. Default: ${explorer[network]}`
       );
   }
-  fee = opts.fee;
-  explorer = { ...EXPLORER_API, [network]: opts.explorer };
 
   return {
     network,
