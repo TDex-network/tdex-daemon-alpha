@@ -90,9 +90,32 @@ Options:
 * [x] Crawler
 * [x] Market making
 
+
+## 🐳 Docker
+
+
+# Build 
+
+```sh
+# Enter the project folder and install node dependencies
+$ cd tdex-daemon-alpha
+$ yarn install
+# Build Nexe bundle for Linux amd64 
+$ yarn build-linux
+# Build docker image
+$ docker build -t sevenlab/tdex-daemon .
+```
+
+# Run 
+
+```sh
+$ docker run -p 9945 -p 9000 -d sevenlab/tdex-daemon --fee 0.5
+```
+
+
 ## 🖥 Local Development
 
-Below is a list of commands you will probably find useful.
+Below is a list of commands you will probably find useful for local development.
 
 ### `yarn start`
 
@@ -121,3 +144,4 @@ Try building the project and runs Eslint and Prettier
 ### `yarn test`
 
 Runs the test watcher (Jest) in an interactive mode. Requires [Nigiri](https://nigiri.vulpem.com/#install) to already be installed.
+
