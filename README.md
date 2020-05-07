@@ -106,6 +106,17 @@ Runs the project in watch mode. Your project will be rebuilt upon changes.
 
 Bundles the package to the `dist` folder.
 
+
+### `yarn build-linux`
+
+Build the TypeScript project and bundle with `Nexe` for Linux amd64 platform
+
+### `yarn build-mac`
+
+Build the TypeScript project and bundle with `Nexe` for Mac OS platform
+
+
+
 ### `yarn lint`
 
 Try building the project and runs Eslint and Prettier
