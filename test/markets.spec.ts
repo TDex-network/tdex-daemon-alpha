@@ -26,30 +26,19 @@ describe(' Markets ', () => {
     // we sent by "mistake" some assets to see how it works
     //await mint(feeAddress, 9000);
     //Give some time to the crawler to catchup
-    await sleep(10000);
+    await sleep(5000);
+    // Get an address for creating a new market
+    await depositAddress();
+    await sleep(500);
 
     const tradableMarkets = await markets();
     expect(tradableMarkets.length).toStrictEqual(0);
-
     // Get an address for creating a new market
-    const marketAddress = await depositAddress();
-    console.log(marketAddress);
-    await sleep(500);
-    // Get an address for creating a new market
-    const marketAddress2 = await depositAddress();
-    console.log(marketAddress2);
-
+    await depositAddress();
     await sleep(500);
 
     const tradableMarkets2 = await markets();
-    console.log(tradableMarkets2);
-
-    await sleep(500);
-
     expect(tradableMarkets2.length).toStrictEqual(0);
-    //Give some time to the crawler to catchup
-    //await sleep(10000);
-    //expect(async () => await markets()).toThrow(TypeError);
   }, 40000);
 
   afterAll(async () => {

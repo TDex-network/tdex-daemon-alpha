@@ -63,9 +63,17 @@ export default class Market {
     try {
       const model = new Markets(datastore);
       const markets = await model.getMarkets();
-      const promises = markets.map((market) =>
-        model.updateMarket({ quoteAsset: market.quoteAsset }, { tradable })
-      );
+      const promises = markets
+        .filter(
+          (m) =>
+            m.quoteAsset &&
+            m.quoteAsset.length > 0 &&
+            m.quoteFundingTX &&
+            m.quoteFundingTX.length > 0
+        )
+        .map((market) =>
+          model.updateMarket({ quoteAsset: market.quoteAsset }, { tradable })
+        );
       await Promise.all(promises);
     } catch (e) {
       logger.error(`Error on updating market statuses: ${e}`);
