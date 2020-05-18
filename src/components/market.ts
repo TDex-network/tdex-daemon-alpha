@@ -68,8 +68,8 @@ export default class Market {
           (m) =>
             m.quoteAsset &&
             m.quoteAsset.length > 0 &&
-            m.quoteFundingTX &&
-            m.quoteFundingTX.length > 0
+            m.quoteFundingTx &&
+            m.quoteFundingTx.length > 0
         )
         .map((market) =>
           model.updateMarket({ quoteAsset: market.quoteAsset }, { tradable })
@@ -87,7 +87,15 @@ export default class Market {
     try {
       const model = new Markets(datastore);
       const markets = await model.getMarkets();
-      return markets.every((market) => market.tradable === true);
+      return markets
+        .filter(
+          (m) =>
+            m.quoteAsset &&
+            m.quoteAsset.length > 0 &&
+            m.quoteFundingTx &&
+            m.quoteFundingTx.length > 0
+        )
+        .every((market) => market.tradable === true);
     } catch (e) {
       logger.error(`Error on getting all markets tradable status: ${e}`);
       return false;

@@ -192,7 +192,7 @@ describe('End to end testing', () => {
     // check if market got back to be tradabale
     const tradableMarketsAgain2 = await markets();
     expect(tradableMarketsAgain2.length).toStrictEqual(1);
-  }, 55000);
+  }, 65000);
 
   test('Calculate expected amount', () => {
     // balanceP, balanceR, amountP, fee
