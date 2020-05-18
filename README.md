@@ -100,7 +100,8 @@ Options:
 # Enter the project folder and install node dependencies
 $ cd tdex-daemon-alpha
 $ yarn install
-# Build Nexe bundle for Linux amd64 
+# Build Nexe bundle for Linux amd64
+# Needs to be for Linux because the container needs it 
 $ yarn build-linux
 # Build docker image
 $ docker build -t sevenlab/tdex-daemon .
