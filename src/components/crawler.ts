@@ -75,12 +75,16 @@ export default class Crawler extends EventEmitter implements CrawlerInterface {
   }
 
   stopAll(): void {
-    Object.keys(this.timer[CrawlerType.DEPOSIT]).forEach((address) => {
-      this.stop(CrawlerType.DEPOSIT, address);
-    });
-    Object.keys(this.timer[CrawlerType.BALANCE]).forEach((address) => {
-      this.stop(CrawlerType.BALANCE, address);
-    });
+    const depositTimers = this.timer[CrawlerType.DEPOSIT];
+    const balanceTimers = this.timer[CrawlerType.BALANCE];
+    depositTimers &&
+      Object.keys(depositTimers).forEach((address) => {
+        this.stop(CrawlerType.DEPOSIT, address);
+      });
+    balanceTimers &&
+      Object.keys(balanceTimers).forEach((address) => {
+        this.stop(CrawlerType.BALANCE, address);
+      });
   }
 
   private async processBalance(address: string) {
