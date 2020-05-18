@@ -99,7 +99,7 @@ export default function Config(logger: Logger, options: any): ConfigInterface {
     fs.writeFileSync(configPath, serialized, { encoding: 'utf8', flag: 'w' });
   } else if (Object.keys(options).length > 0) {
     logger.warn(
-      'Configuration file already exists. Given arguments will be discarded'
+      `Configuration file already exists at path ${datadir}. Given arguments will be discarded`
     );
   }
 
