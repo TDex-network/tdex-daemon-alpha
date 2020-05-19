@@ -1,6 +1,6 @@
 import Datastore from 'nedb';
 import { UtxoInterface } from '../utils';
-import Markets from '../models/markets';
+import Markets, { MarketSchema } from '../models/markets';
 import winston from 'winston';
 
 export default class Market {
@@ -64,13 +64,7 @@ export default class Market {
       const model = new Markets(datastore);
       const markets = await model.getMarkets();
       const promises = markets
-        .filter(
-          (m) =>
-            m.quoteAsset &&
-            m.quoteAsset.length > 0 &&
-            m.quoteFundingTx &&
-            m.quoteFundingTx.length > 0
-        )
+        .filter((m) => this.isFunded(m))
         .map((market) =>
           model.updateMarket({ quoteAsset: market.quoteAsset }, { tradable })
         );
@@ -88,17 +82,25 @@ export default class Market {
       const model = new Markets(datastore);
       const markets = await model.getMarkets();
       return markets
-        .filter(
-          (m) =>
-            m.quoteAsset &&
-            m.quoteAsset.length > 0 &&
-            m.quoteFundingTx &&
-            m.quoteFundingTx.length > 0
-        )
+        .filter((m) => this.isFunded(m))
         .every((market) => market.tradable === true);
     } catch (e) {
       logger.error(`Error on getting all markets tradable status: ${e}`);
       return false;
     }
+  }
+
+  static isFunded(m: MarketSchema): boolean {
+    const isFunded =
+      m.baseAsset &&
+      m.baseAsset.length > 0 &&
+      m.quoteAsset &&
+      m.quoteAsset.length > 0 &&
+      m.baseFundingTx &&
+      m.baseFundingTx.length > 0 &&
+      m.quoteFundingTx &&
+      m.quoteFundingTx.length > 0;
+
+    return typeof isFunded === 'boolean' && isFunded;
   }
 }
