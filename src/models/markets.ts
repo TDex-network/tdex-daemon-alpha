@@ -6,7 +6,7 @@ export type MarketSchema = {
   baseAsset: string;
   quoteAsset: string; // the non-base asset hash is used as the market id
   baseFundingTx?: string;
-  quoteFundingTX?: string;
+  quoteFundingTx?: string;
   walletAddress: string;
   derivationIndex: number;
 };
