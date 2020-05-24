@@ -1,4 +1,4 @@
-import grpc from 'grpc';
+import * as grpc from '@grpc/grpc-js';
 import { networks } from 'liquidjs-lib';
 import { Logger } from 'winston';
 
