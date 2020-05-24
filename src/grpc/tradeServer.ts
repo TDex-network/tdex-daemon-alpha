@@ -1,4 +1,4 @@
-import { Server, ServerCredentials } from 'grpc';
+import { Server, ServerCredentials } from '@grpc/grpc-js';
 import { Logger } from 'winston';
 
 import { TradeService, Trade } from '../services/tradeService';
@@ -27,15 +27,15 @@ export default class TradeServer {
   }
 
   listen(host: string, port: number): void {
-    const bindCode = this.server.bind(
+    this.server.bindAsync(
       `${host}:${port}`,
-      ServerCredentials.createInsecure()
+      ServerCredentials.createInsecure(),
+      (err) => {
+        if (err) throw new Error(`gRPC could not bind on port: ${port}`);
+        this.server.start();
+        this.logger.info(`Trader gRPC server listening on ${host}:${port}`);
+      }
     );
-
-    if (bindCode === 0) throw new Error(`gRPC could not bind on port: ${port}`);
-
-    this.server.start();
-    this.logger.info(`Trader gRPC server listening on ${host}:${port}`);
   }
 
   close(): Promise<void> {

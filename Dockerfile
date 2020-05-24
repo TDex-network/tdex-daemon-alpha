@@ -4,7 +4,6 @@ FROM node:12
 WORKDIR /root
 
 # Install app dependencies
-RUN npm install grpc
 COPY ./bin/tdex-daemon-linux ./tdex-daemon
 
 EXPOSE 9945
