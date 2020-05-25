@@ -5790,13 +5790,13 @@ tar@^4, tar@^4.4.2:
     safe-buffer "^5.1.2"
     yallist "^3.0.3"
 
-tdex-protobuf@sevenlab/tdex-protobuf#grpc-js:
+tdex-protobuf@sevenlab/tdex-protobuf:
   version "1.0.0"
-  resolved "git+ssh://git@github.com/sevenlab/tdex-protobuf.git#f35e20463bde2e810c87925bf8fc4d5006d5594e"
+  resolved "git+ssh://git@github.com/sevenlab/tdex-protobuf.git#a9cfbc5a2588bde05a429152f9efbee415b82416"
 
-tdex-sdk@sevenlab/tdex-sdk#grpc-js:
+tdex-sdk@sevenlab/tdex-sdk:
   version "0.1.0"
-  resolved "git+ssh://git@github.com/sevenlab/tdex-sdk.git#c6dcfde499fb7622539f5bf9d56e9b7824d32433"
+  resolved "git+ssh://git@github.com/sevenlab/tdex-sdk.git#e9dd6fc0cfbc9606de5e1ba2eb4c4062395f4df0"
   dependencies:
     "@grpc/grpc-js" "^1.0.4"
     "@types/google-protobuf" "^3.7.2"
@@ -5804,7 +5804,7 @@ tdex-sdk@sevenlab/tdex-sdk#grpc-js:
     google-protobuf "^3.11.4"
     jsbi "^3.1.2"
     liquidjs-lib vulpemventures/liquidjs-lib
-    tdex-protobuf sevenlab/tdex-protobuf#grpc-js
+    tdex-protobuf sevenlab/tdex-protobuf
 
 terminal-link@^2.0.0:
   version "2.1.1"
