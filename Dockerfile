@@ -1,4 +1,4 @@
-FROM node:12
+FROM debian:stable-slim
 
 # Create app directory
 WORKDIR /root
