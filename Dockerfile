@@ -1,10 +1,9 @@
-FROM node:12
+FROM debian:stable-slim
 
 # Create app directory
 WORKDIR /root
 
 # Install app dependencies
-RUN npm install grpc
 COPY ./bin/tdex-daemon-linux ./tdex-daemon
 
 EXPOSE 9945

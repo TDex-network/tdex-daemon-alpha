@@ -1,4 +1,4 @@
-import grpc from 'grpc';
+import * as grpc from '@grpc/grpc-js';
 import {
   Swap,
   calculateExpectedAmount,
@@ -65,11 +65,18 @@ class Trade {
   }
 
   async balances(
-    call: grpc.ServerUnaryCall<BalancesRequest>,
+    call: grpc.ServerUnaryCall<BalancesRequest, BalancesReply>,
     callback: grpc.sendUnaryData<BalancesReply>
   ): Promise<void> {
+    const model = new Markets(this.datastore.markets);
     try {
-      const model = new Markets(this.datastore.markets);
+      if (!call.request)
+        throw {
+          code: grpc.status.INVALID_ARGUMENT,
+          name: 'INVALID_ARGUMENT',
+          message: 'Malformed request',
+        };
+
       const market = call.request.getMarket();
       if (!market)
         throw {
@@ -123,12 +130,19 @@ class Trade {
   }
 
   async tradePropose(
-    call: grpc.ServerWritableStream<TradeProposeRequest>
+    call: grpc.ServerWritableStream<TradeProposeRequest, TradeProposeReply>
   ): Promise<void> {
     const marketModel = new Markets(this.datastore.markets);
     const swapModel = new Swaps(this.datastore.swaps);
 
     try {
+      if (!call.request)
+        throw {
+          code: grpc.status.INVALID_ARGUMENT,
+          name: 'INVALID_ARGUMENT',
+          message: 'Malformed request',
+        };
+
       const market = call.request.getMarket();
       const tradeType = call.request.getType();
       const swapRequestMessage = call.request.getSwapRequest();
@@ -300,12 +314,19 @@ class Trade {
   }
 
   async tradeComplete(
-    call: grpc.ServerWritableStream<TradeCompleteRequest>
+    call: grpc.ServerWritableStream<TradeCompleteRequest, TradeCompleteReply>
   ): Promise<void> {
     const swapModel = new Swaps(this.datastore.swaps);
     let swapAcceptId = undefined;
 
     try {
+      if (!call.request)
+        throw {
+          code: grpc.status.INVALID_ARGUMENT,
+          name: 'INVALID_ARGUMENT',
+          message: 'Malformed request',
+        };
+
       const swapComplete = call.request.getSwapComplete();
       swapAcceptId = swapComplete!.getAcceptId();
       if (!swapComplete || !swapAcceptId)
