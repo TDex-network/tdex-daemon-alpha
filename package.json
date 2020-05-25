@@ -27,8 +27,8 @@
     "liquidjs-lib": "vulpemventures/liquidjs-lib",
     "nedb": "^1.8.0",
     "path": "^0.12.7",
-    "tdex-protobuf": "sevenlab/tdex-protobuf#grpc-js",
-    "tdex-sdk": "sevenlab/tdex-sdk#grpc-js",
+    "tdex-protobuf": "sevenlab/tdex-protobuf",
+    "tdex-sdk": "sevenlab/tdex-sdk",
     "winston": "^3.2.1",
     "yargs": "^15.3.1"
   },
