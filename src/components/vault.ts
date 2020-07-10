@@ -88,12 +88,6 @@ async function generateSeedAndSave(filepath: string): Promise<void> {
   while (!bip39.validateMnemonic(mnemonic))
     mnemonic = bip39.generateMnemonic(256);
 
-  console.log(
-    'You will never see it again. You must write these words down and keep it safe, it is the only way to restore your markets'
-  );
-  console.log(mnemonic);
-  console.log();
-
   let isEncrypted;
   let value: string;
   if (storageType === 'encrypted') {
@@ -120,11 +114,15 @@ async function generateSeedAndSave(filepath: string): Promise<void> {
     { encoding: 'utf8', flag: 'w' }
   );
 
+  console.log(
+    `\nThe mnemonic seed has been saved in ${filepath}.\nBe sure to make a safe backup of your data directory, it is the only way to restore your funds\n`
+  );
+
   if (isEncrypted) {
     console.log(
-      'Wallet created! Restart the daemon exporting the env variable TDEX_PASSWORD'
+      `You must restart the daemon exporting the env variable TDEX_PASSWORD`
     );
-    console.log('Shutting down...');
+    console.log('Shutting down...\n');
     process.exit(0);
   }
 }
