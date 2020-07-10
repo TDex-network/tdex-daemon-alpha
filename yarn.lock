@@ -3957,9 +3957,9 @@ lines-and-columns@^1.1.6:
   resolved "https://registry.yarnpkg.com/lines-and-columns/-/lines-and-columns-1.1.6.tgz#1c00c743b433cd0a4e80758f7b64a57440d9ff00"
   integrity sha1-HADHQ7QzzQpOgHWPe2SldEDZ/wA=
 
-liquidjs-lib@vulpemventures/liquidjs-lib:
+liquidjs-lib@provable-things/liquidjs-lib:
   version "5.1.6"
-  resolved "git+ssh://git@github.com/vulpemventures/liquidjs-lib.git#97673986c4233dee61f98dc59b5256ed2a8f313d"
+  resolved "https://codeload.github.com/provable-things/liquidjs-lib/tar.gz/97673986c4233dee61f98dc59b5256ed2a8f313d"
   dependencies:
     axios "^0.19.2"
     bech32 "^1.1.2"
@@ -5790,21 +5790,21 @@ tar@^4, tar@^4.4.2:
     safe-buffer "^5.1.2"
     yallist "^3.0.3"
 
-tdex-protobuf@sevenlab/tdex-protobuf:
+tdex-protobuf@tdex-network/tdex-protobuf:
   version "1.0.0"
-  resolved "git+ssh://git@github.com/sevenlab/tdex-protobuf.git#a9cfbc5a2588bde05a429152f9efbee415b82416"
+  resolved "https://codeload.github.com/tdex-network/tdex-protobuf/tar.gz/2b1d16c289e813fc00b40edf565d2f5df33e19b4"
 
-tdex-sdk@sevenlab/tdex-sdk:
+tdex-sdk@tdex-network/tdex-sdk:
   version "0.1.0"
-  resolved "git+ssh://git@github.com/sevenlab/tdex-sdk.git#e9dd6fc0cfbc9606de5e1ba2eb4c4062395f4df0"
+  resolved "git+ssh://git@github.com/tdex-network/tdex-sdk.git#5f606c3ef2a8ab98f3d81037df601b8a64d41543"
   dependencies:
     "@grpc/grpc-js" "^1.0.4"
     "@types/google-protobuf" "^3.7.2"
     axios "^0.19.2"
     google-protobuf "^3.11.4"
     jsbi "^3.1.2"
-    liquidjs-lib vulpemventures/liquidjs-lib
-    tdex-protobuf sevenlab/tdex-protobuf
+    liquidjs-lib provable-things/liquidjs-lib
+    tdex-protobuf tdex-network/tdex-protobuf
 
 terminal-link@^2.0.0:
   version "2.1.1"
