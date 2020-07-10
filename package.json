@@ -28,8 +28,8 @@
     "liquidjs-lib": "provable-things/liquidjs-lib",
     "nedb": "^1.8.0",
     "path": "^0.12.7",
-    "tdex-protobuf": "tdex-network/tdex-protobuf",
-    "tdex-sdk": "tdex-network/tdex-sdk",
+    "tdex-protobuf": "tdex-network/tdex-protobuf#master",
+    "tdex-sdk": "tdex-network/tdex-sdk#master",
     "winston": "^3.2.1",
     "yargs": "^15.3.1"
   },
