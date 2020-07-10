@@ -2,85 +2,9 @@
 Alpha Daemon implementation to execute automated market marking strategies on top of TDEX
 
 
-## ⬇️ Install
+## Usage
 
-* Install with **npm**
-
-```sh
-$ npm install -g tdex-daemon
-```
-
-* Download standalone binary (nodejs/npm not needed)
-
-[Download latest release (Mac or Linux)](https://github.com/Sevenlab/tdex-daemon-alpha/releases) 
-
-Move into a folder in your PATH (eg. `/usr/bin` or `/usr/local/bin`)
-
-
-## 🏃‍♀️ Run
-
-Once the daemon is launched it will create a data directory `~/.tdex-daemon` containing the default configuration file `config.json`.
-
-It's possible to use a different path for the data directory with the environment variable `TDEX_DAEMON_PATH`
-
-```sh
-$ tdex-daemon --regtest
-? How do you want to store your seed? 🔑 … 
-❯ Encrypted (AES-128-CBC)
-  Plain Text (not recommended)
-```
-
-It will be created a wallet for the daemon and stored in the chosen data directory in a file `vault.json`.
-
-You can encrypt it with a password and if you decide to do so the daemon will save it encrypted and shutdown.
-
-Then start again exporting the environment variable `TDEX_PASSWORD` with the chosen password so the daemon could automatically process incoming swap requests. 
-> DO NOT FORGET THE PASSWORD, OR YOU WILL NOT BE ABLE TO RECOVER YOUR FUNDS
-
-```sh
-$ export TDEX_PASSWORD=ChosenPassword
-$ tdex-daemon
-info: Trader gRPC server listening on 0.0.0.0:9945
-info: Operator gRPC server listening on 0.0.0.0:9000
-```
-
-If running on a VPS or the cloud, open the ports for the two gRPC interfaces.
-
-## 💰 Deposit funds
-
-To start a market, you need to deposit two reserves for the pair you are providing liquidity for. 
-The initial ratio of two amounts you deposit will represent the starting price you give to that pair. 
-
-From that point on, the **market making strategy will self regulate the trading price**.
-
-You will also need to deposit in a different address an amount of LBTCs used by all markets to pay for transaction fees.
-
-1. Download and install the [`tdex-cli`](https://github.com/Sevenlab/tdex-cli) 
-2. Connect the CLI to the daemon with the gRPC **operator** interface. 
-```sh
-$ tdex-cli operator connect localhost:9000
-```
-3. Get the deposit address for the fee account and send some L-BTC
-```
-$ tdex-cli operator deposit --fee
-```
-4. Get the deposit address and send L-BTC and other Liquid assets to create and start a `market`
-```sh
-$ tdex-cli operator deposit
-```
-5. Profit! 
-
-## 🖥 Available options
-
-```sh
-Options:
-  --help          Show help                                            
-  --version       Show version number                                  
-  --regtest, -r   Run in regtest mode                 
-  --fee, -f       Specify a default fee to be used by markets
-  --explorer, -e  Specify an Electrs HTTP REST endpoint                                         
-```
-> If a `config.json` file already exists in the chosen `datadir` given arguments will be discarded.
+In-depth documentation for running `tdex-daemon` is available at [docs.tdex.network](https://docs.tdex.network/tdex-daemon.html)
 
 ## 🛣 Roadmap
 
@@ -88,32 +12,8 @@ Options:
 * [x] Trade protocol
 * [x] Wallet
 * [x] Crawler
-* [x] Market making
+* [x] Constant Product Market making
 
-
-## 🐳 Docker
-
-
-# Build 
-
-```sh
-# Enter the project folder and install node dependencies
-$ cd tdex-daemon-alpha
-$ yarn install
-# Build Nexe bundle for Linux amd64
-# Needs to be for Linux because the container needs it 
-$ yarn build-linux
-# Build docker image
-$ docker build -t sevenlab/tdex-daemon .
-```
-
-# Run 
-
-```sh
-$ docker run --name tdex --restart unless-stopped  -p 9945 -p 9000 -v $(pwd)/data:/root/.tdex-daemon -it sevenlab/tdex-daemon
-```
-
-To detach the tty without exiting the shell, use the escape sequence Ctrl+P followed by Ctrl+Q
 
 ## 🖥 Local Development
 
