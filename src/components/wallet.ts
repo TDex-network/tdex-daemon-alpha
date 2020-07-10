@@ -1,4 +1,5 @@
 import {
+  networks,
   ECPair,
   payments,
   Psbt,
@@ -201,8 +202,9 @@ export default class Wallet implements WalletInterface {
     return psbt.extractTransaction().toHex();
   }
 
-  static createTx(): string {
-    const psbt = new Psbt();
+  static createTx(network?: string): string {
+    const _network = network ? (networks as any)[network] : networks.liquid;
+    const psbt = new Psbt({ network: _network });
     return psbt.toBase64();
   }
 }
