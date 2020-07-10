@@ -67,7 +67,8 @@ export default class Vault implements VaultInterface {
 const type = new enquirer.Select({
   type: 'select',
   name: 'type',
-  message: 'How do you want to store your seed? 🔑',
+  message:
+    'A new wallet will be created and persisted in the chosen data directory. How do you want to store your seed? 🔑',
   choices: [
     { name: 'encrypted', message: 'Encrypted (AES-128-CBC)' }, //<= choice object
     { name: 'plain', message: 'Plain Text (not recommended)' }, //<= choice object
@@ -86,6 +87,12 @@ async function generateSeedAndSave(filepath: string): Promise<void> {
   let mnemonic = bip39.generateMnemonic(256);
   while (!bip39.validateMnemonic(mnemonic))
     mnemonic = bip39.generateMnemonic(256);
+
+  console.log(
+    'You will never see it again. You must write these words down and keep it safe, it is the only way to restore your markets'
+  );
+  console.log(mnemonic);
+  console.log();
 
   let isEncrypted;
   let value: string;
