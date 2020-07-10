@@ -16,7 +16,8 @@
     "start": "npx ts-node src",
     "lint": "bash scripts/lint",
     "clean": "bash scripts/clean",
-    "test": "bash scripts/test"
+    "test": "bash scripts/test",
+    "test-ci": "bash scripts/ci"
   },
   "dependencies": {
     "@grpc/grpc-js": "^1.0.4",

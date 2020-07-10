@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -e
+
+PARENT_PATH=$(dirname $(cd $(dirname $0); pwd -P))
+
+pushd $PARENT_PATH
+
+sleep 10s
+export TDEX_DAEMON_PATH=$(pwd)/test/datadir 
+yarn clean
+npx jest --detectOpenHandles test/e2e.spec.ts
+yarn clean
+npx jest --detectOpenHandles test/markets.spec.ts
+
+popd
