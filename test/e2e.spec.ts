@@ -80,7 +80,7 @@ describe('End to end testing', () => {
     await faucet(traderWallet.address);
     const traderUtxos = await fetchUtxos(traderWallet.address, LBTC);
 
-    const emptyPsbt = Wallet.createTx();
+    const emptyPsbt = Wallet.createTx('regtest');
     const psbt = traderWallet.updateTx(
       emptyPsbt,
       traderUtxos,
@@ -147,7 +147,7 @@ describe('End to end testing', () => {
       balancesAndFee.fee
     );
     const traderUtxos2 = await fetchUtxos(traderWallet.address, USDT);
-    const emptyPsbt2 = Wallet.createTx();
+    const emptyPsbt2 = Wallet.createTx('regtest');
     const psbt2 = traderWallet.updateTx(
       emptyPsbt2,
       traderUtxos2,

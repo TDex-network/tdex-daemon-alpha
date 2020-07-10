@@ -1,5 +1,5 @@
 import * as winston from 'winston';
-const { colorize, combine, simple, timestamp, prettyPrint } = winston.format;
+const { combine, timestamp, colorize, printf, prettyPrint } = winston.format;
 
 export type LogConfig = {
   level?: string;
@@ -15,7 +15,11 @@ export default function createLogger(config: LogConfig = {}): winston.Logger {
     new winston.transports.Console({
       level,
       silent,
-      format: combine(colorize(), simple()),
+      format: combine(
+        timestamp(),
+        colorize(),
+        printf((info) => `${info.timestamp} ${info.level}: ${info.message}`)
+      ),
     })
   );
   if (logPath)

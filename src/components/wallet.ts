@@ -1,4 +1,5 @@
 import {
+  networks,
   ECPair,
   payments,
   Psbt,
@@ -128,7 +129,9 @@ export default class Wallet implements WalletInterface {
 
     const psbt = Psbt.fromBase64(psbtBase64);
     const tx = Transaction.fromBuffer(psbt.data.getTransaction());
-    const { fees } = calculateFees(tx.ins.length + 1, tx.outs.length + 2);
+    const { fees } = calculateFees(tx.ins.length + 1, tx.outs.length + 2, {
+      satPerByte: 0.2,
+    });
     const encodedAsset = Buffer.concat([
       Buffer.alloc(1, 1),
       Buffer.from(this.network.assetHash, 'hex').reverse(),
@@ -201,8 +204,9 @@ export default class Wallet implements WalletInterface {
     return psbt.extractTransaction().toHex();
   }
 
-  static createTx(): string {
-    const psbt = new Psbt();
+  static createTx(network?: string): string {
+    const _network = network ? (networks as any)[network] : networks.liquid;
+    const psbt = new Psbt({ network: _network });
     return psbt.toBase64();
   }
 }

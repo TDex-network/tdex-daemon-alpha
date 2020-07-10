@@ -67,7 +67,8 @@ export default class Vault implements VaultInterface {
 const type = new enquirer.Select({
   type: 'select',
   name: 'type',
-  message: 'How do you want to store your seed? 🔑',
+  message:
+    'A new wallet will be created and persisted in the chosen data directory. How do you want to store your seed? 🔑',
   choices: [
     { name: 'encrypted', message: 'Encrypted (AES-128-CBC)' }, //<= choice object
     { name: 'plain', message: 'Plain Text (not recommended)' }, //<= choice object
@@ -113,11 +114,15 @@ async function generateSeedAndSave(filepath: string): Promise<void> {
     { encoding: 'utf8', flag: 'w' }
   );
 
+  console.log(
+    `\nThe mnemonic seed has been saved in ${filepath}.\nBe sure to make a safe backup of your data directory, it is the only way to restore your funds\n`
+  );
+
   if (isEncrypted) {
     console.log(
-      'Wallet created! Restart the daemon exporting the env variable TDEX_PASSWORD'
+      `You must restart the daemon exporting the env variable TDEX_PASSWORD`
     );
-    console.log('Shutting down...');
+    console.log('Shutting down...\n');
     process.exit(0);
   }
 }
