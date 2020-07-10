@@ -3,7 +3,13 @@
   "version": "1.0.0",
   "description": "Daemon for Liquidity Providers to execute automated market marking strategies on top of TDEX",
   "main": "dist/index.js",
-  "author": "Marco Argentieri",
+  "contributors": [
+    {
+      "name": "Marco Argentieri",
+      "email": "marco@vulpem.com",
+      "url": "https://vulpem.com"
+    }
+  ],
   "license": "MIT",
   "bin": {
     "tdex-daemon": "./dist/index.js"
@@ -28,8 +34,8 @@
     "liquidjs-lib": "provable-things/liquidjs-lib",
     "nedb": "^1.8.0",
     "path": "^0.12.7",
-    "tdex-protobuf": "tdex-network/tdex-protobuf#master",
-    "tdex-sdk": "tdex-network/tdex-sdk#master",
+    "tdex-protobuf": "tdex-network/tdex-protobuf",
+    "tdex-sdk": "tdex-network/tdex-sdk",
     "winston": "^3.2.1",
     "yargs": "^15.3.1"
   },

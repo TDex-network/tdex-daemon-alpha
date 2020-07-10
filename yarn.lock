@@ -5744,13 +5744,13 @@ tar@^4, tar@^4.4.2:
     safe-buffer "^5.1.2"
     yallist "^3.0.3"
 
-tdex-protobuf@tdex-network/tdex-protobuf, tdex-protobuf@tdex-network/tdex-protobuf#master:
+tdex-protobuf@tdex-network/tdex-protobuf:
   version "1.0.0"
   resolved "https://codeload.github.com/tdex-network/tdex-protobuf/tar.gz/2b1d16c289e813fc00b40edf565d2f5df33e19b4"
 
-tdex-sdk@tdex-network/tdex-sdk#master:
+tdex-sdk@tdex-network/tdex-sdk:
   version "0.1.0"
-  resolved "https://codeload.github.com/tdex-network/tdex-sdk/tar.gz/be66b922c93acdef1b90fcd24c752eb0f419a243"
+  resolved "https://codeload.github.com/tdex-network/tdex-sdk/tar.gz/b178a691035bf6b1312d6ad627284a15b3b86e98"
   dependencies:
     "@grpc/grpc-js" "^1.0.4"
     "@types/google-protobuf" "^3.7.2"
