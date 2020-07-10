@@ -5748,9 +5748,9 @@ tdex-protobuf@tdex-network/tdex-protobuf:
   version "1.0.0"
   resolved "https://codeload.github.com/tdex-network/tdex-protobuf/tar.gz/2b1d16c289e813fc00b40edf565d2f5df33e19b4"
 
-tdex-sdk@tdex-network/tdex-sdk:
+"tdex-sdk@https://github.com/tdex-network/tdex-sdk":
   version "0.1.0"
-  resolved "https://codeload.github.com/tdex-network/tdex-sdk/tar.gz/be66b922c93acdef1b90fcd24c752eb0f419a243"
+  resolved "https://github.com/tdex-network/tdex-sdk#be66b922c93acdef1b90fcd24c752eb0f419a243"
   dependencies:
     "@grpc/grpc-js" "^1.0.4"
     "@types/google-protobuf" "^3.7.2"
