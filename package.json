@@ -17,8 +17,8 @@
   "scripts": {
     "watch": "npx tsc --watch",
     "build": "npx tsc",
-    "build-mac": "yarn build && npx nexe dist/index.js -t darwin-x64 -o bin/tdex-daemon-darwin",
-    "build-linux": "yarn build &&  npx nexe dist/index.js -t linux-x64 -o bin/tdex-daemon-linux",
+    "build-mac": "yarn build && npx nexe dist/index.js -t darwin-x64 -o bin/tdex-daemon-v$npm_package_version-darwin",
+    "build-linux": "yarn build &&  npx nexe dist/index.js -t linux-x64 -o bin/tdex-daemon-v$npm_package_version-linux",
     "start": "npx ts-node src",
     "lint": "bash scripts/lint",
     "clean": "bash scripts/clean",

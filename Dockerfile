@@ -4,7 +4,7 @@ FROM debian:stable-slim
 WORKDIR /root
 
 # Install app dependencies
-COPY ./bin/tdex-daemon-linux ./tdex-daemon
+COPY ./bin/tdex-daemon-*-linux ./tdex-daemon
 
 EXPOSE 9945
 EXPOSE 9000
