@@ -110,3 +110,6 @@ dist
 
 # VSCODE
 .vscode
+
+# InteliJ
+.idea

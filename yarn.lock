@@ -2812,6 +2812,11 @@ grpc-tools@^1.8.1:
   dependencies:
     node-pre-gyp "^0.12.0"
 
+grpc-web@~1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/grpc-web/-/grpc-web-1.2.0.tgz#96402a1245ea834fedb1dd5a80f910476ddbbb1c"
+  integrity sha512-QS0RF+xiWnMEiHWyA0A0I8JYYJLOiF/DGEpRQ7vJDOzEZYfmNqI7d7d29sYBbNfTi+arVh2JpeGIX7ch24a+tA==
+
 grpc@^1.24.2:
   version "1.24.3"
   resolved "https://registry.yarnpkg.com/grpc/-/grpc-1.24.3.tgz#92efe28dfc1250dca179b8133e40b4f2341473d9"
@@ -5746,7 +5751,9 @@ tar@^4, tar@^4.4.2:
 
 tdex-protobuf@tdex-network/tdex-protobuf:
   version "1.0.0"
-  resolved "https://codeload.github.com/tdex-network/tdex-protobuf/tar.gz/2b1d16c289e813fc00b40edf565d2f5df33e19b4"
+  resolved "https://codeload.github.com/tdex-network/tdex-protobuf/tar.gz/1d7548f4a8a7db0a1b4c53a9e2e368c5bc79048f"
+  dependencies:
+    grpc-web "~1.2.0"
 
 tdex-sdk@tdex-network/tdex-sdk:
   version "0.1.0"
