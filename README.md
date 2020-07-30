@@ -17,6 +17,15 @@ In-depth documentation for running `tdex-daemon` is available at [docs.tdex.netw
 
 ## 🖥 Local Development
 
+To invoke TDEX trade grpc server from browser do as follows:
+- Start tdex-daemon 
+`yarn start`
+- Download pre-build binaries from grpcwebproxy from [here](https://github.com/improbable-eng/grpc-web/releases).
+
+- Start gowebproxy
+
+`grpcwebproxy --backend_addr=localhost:9945 --run_tls_server=false --allow_all_origins`
+
 Below is a list of commands you will probably find useful for local development.
 
 ### `yarn start`
