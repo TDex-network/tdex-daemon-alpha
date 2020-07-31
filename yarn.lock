@@ -2745,7 +2745,12 @@ globby@^9.2.0:
     pify "^4.0.1"
     slash "^2.0.0"
 
-google-protobuf@^3.11.4, google-protobuf@^3.6.1:
+google-protobuf@^3.11.4:
+  version "3.12.4"
+  resolved "https://registry.yarnpkg.com/google-protobuf/-/google-protobuf-3.12.4.tgz#fd89b7e5052cdb35a80f9b455612851d542a5c9f"
+  integrity sha512-ItTn8YepDQMHEMHloUPH+FDaTPiHTnbsMvP50aXfbI65IK3AA5+wXlHSygJH8xz+h1g4gu7V+CK5X1/SaGITsA==
+
+google-protobuf@^3.6.1:
   version "3.12.2"
   resolved "https://registry.yarnpkg.com/google-protobuf/-/google-protobuf-3.12.2.tgz#50ce9f9b6281235724eb243d6a83e969a2176e53"
   integrity sha512-4CZhpuRr1d6HjlyrxoXoocoGFnRYgKULgMtikMddA9ztRyYR59Aondv2FioyxWVamRo0rF2XpYawkTCBEQOSkA==
@@ -5749,15 +5754,14 @@ tar@^4, tar@^4.4.2:
     safe-buffer "^5.1.2"
     yallist "^3.0.3"
 
-tdex-protobuf@tdex-network/tdex-protobuf:
+tdex-protobuf@tdex-network/tdex-protobuf#master:
   version "1.0.0"
   resolved "https://codeload.github.com/tdex-network/tdex-protobuf/tar.gz/1d7548f4a8a7db0a1b4c53a9e2e368c5bc79048f"
-  dependencies:
-    grpc-web "~1.2.0"
 
-tdex-sdk@tdex-network/tdex-sdk:
+tdex-sdk@^0.1.0:
   version "0.1.0"
-  resolved "https://codeload.github.com/tdex-network/tdex-sdk/tar.gz/b178a691035bf6b1312d6ad627284a15b3b86e98"
+  resolved "https://registry.yarnpkg.com/tdex-sdk/-/tdex-sdk-0.1.0.tgz#576b93c3e362f80783b4bd30e8a3e6537a405318"
+  integrity sha512-Nour3aMIFoboEKFe/3T5nkcIwNd1hDPguQ3+jrfbh522JuzJ0Qh3m6EDq2VA+PM+UFNeAgrp/0hPVdZxV5zbfA==
   dependencies:
     "@grpc/grpc-js" "^1.0.4"
     "@types/google-protobuf" "^3.7.2"
@@ -5765,7 +5769,8 @@ tdex-sdk@tdex-network/tdex-sdk:
     google-protobuf "^3.11.4"
     jsbi "^3.1.2"
     liquidjs-lib provable-things/liquidjs-lib
-    tdex-protobuf tdex-network/tdex-protobuf
+    tdex-protobuf tdex-network/tdex-protobuf#master
+    tslib "^2.0.0"
 
 terminal-link@^2.0.0:
   version "2.1.1"
@@ -5953,6 +5958,11 @@ tslib@^1.8.1, tslib@^1.9.0:
   version "1.13.0"
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-1.13.0.tgz#c881e13cc7015894ed914862d276436fa9a47043"
   integrity sha512-i/6DQjL8Xf3be4K/E6Wgpekn5Qasl1usyw++dAA35Ue5orEn65VIxOA+YvNNl9HV3qv70T7CNwjODHZrLwvd1Q==
+
+tslib@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.0.0.tgz#18d13fc2dce04051e20f074cc8387fd8089ce4f3"
+  integrity sha512-lTqkx847PI7xEDYJntxZH89L2/aXInsyF2luSafe/+0fHOMjlBNXdH6th7f70qxLDhul7KZK0zC8V5ZIyHl0/g==
 
 tsutils@^3.17.1:
   version "3.17.1"

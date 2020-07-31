@@ -14,17 +14,31 @@ In-depth documentation for running `tdex-daemon` is available at [docs.tdex.netw
 * [x] Crawler
 * [x] Constant Product Market making
 
+## 🐳 Docker
 
-## 🖥 Local Development
+
+### Build 
+
+```sh
+# Enter the project folder and install node dependencies
+$ yarn install
+# bundle for Linux amd64 
+$ yarn build-linux
+# Build docker image
+$ docker build -t truedex/tdex-daemon:latest .
+```
+
+## 🌐 Browser
 
 To invoke TDEX trade grpc server from browser do as follows:
-- Start tdex-daemon 
-`yarn start`
-- Download pre-build binaries from grpcwebproxy from [here](https://github.com/improbable-eng/grpc-web/releases).
 
-- Start gowebproxy
+- Start tdex-daemon `yarn start`
+- Download pre-build binary of grpcwebproxy from [here](https://github.com/improbable-eng/grpc-web/releases)
+- Start gowebproxy `grpcwebproxy --backend_addr=localhost:9945 --run_tls_server=false --allow_all_origins`
 
-`grpcwebproxy --backend_addr=localhost:9945 --run_tls_server=false --allow_all_origins`
+
+
+## 🖥 Local Development
 
 Below is a list of commands you will probably find useful for local development.
 
