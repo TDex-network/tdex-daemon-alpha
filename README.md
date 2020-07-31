@@ -28,7 +28,7 @@ $ yarn build-linux
 $ docker build -t truedex/tdex-daemon:latest .
 ```
 
-## 🌐 Browser
+## 🌐 Browser support
 
 To invoke TDEX trade grpc server from browser do as follows:
 
@@ -36,6 +36,11 @@ To invoke TDEX trade grpc server from browser do as follows:
 - Download pre-build binary of grpcwebproxy from [here](https://github.com/improbable-eng/grpc-web/releases)
 - Start gowebproxy `grpcwebproxy --backend_addr=localhost:9945 --run_tls_server=false --allow_all_origins`
 
+You can also start it with docker:
+
+```sh
+$ docker run --name gwp --network host -t truedex/grpcwebproxy:latest --backend_addr=:9945 --run_tls_server=false --allow_all_origins 
+```
 
 
 ## 🖥 Local Development
