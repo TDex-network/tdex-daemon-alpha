@@ -35,7 +35,7 @@
     "nedb": "^1.8.0",
     "path": "^0.12.7",
     "tdex-protobuf": "tdex-network/tdex-protobuf#master",
-    "tdex-sdk": "tdex-network/tdex-sdk",
+    "tdex-sdk": "^0.1.0",
     "winston": "^3.2.1",
     "yargs": "^15.3.1"
   },
