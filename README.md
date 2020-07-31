@@ -1,4 +1,4 @@
-# 💸 tdex-daemon-alpha
+# 💰 tdex-daemon-alpha
 Alpha Daemon implementation to execute automated market marking strategies on top of TDEX
 
 
